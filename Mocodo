@@ -1,0 +1,23 @@
+Sur https://www.mocodo.net/, Mocodo NON VERIFIER et peux être modifier !
+
+FORMATEUR: login, mot_de_passe, nom, prénom
+AUTHENTIFIER, 11 FORMATEUR, 0N SESSION
+SESSION: id_session, date_heure, type_environnement, conditions_meteo, force_vent, direction_vent, type_drone, duree_max, horodatage_debut, horodatage_fin
+EVALUER, 0N SESSION, 0N OBJECTIF: statut_validation, nb_essais, horodatage_validation
+
+:
+:
+REALISER, 11 SESSION, 0N APPRENTI
+OBJECTIF: id_objectif, libelle_objectif, est_automatique
+
+:
+:
+APPRENTI: id_apprenti, nom, prénom
+:
+
+:
+:
+APPARTIENT, 11 APPRENTI, 0N CLASSE
+CLASSE: id_classe, libelle_classe
+
+
