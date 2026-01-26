@@ -25,6 +25,9 @@
         <button name="ajouter" type="submit">Ajouter</button>
     </form>
 
+    <br>
+    <a href="/signout">Se déconnecter</a>
+
     @if (session('error'))
         <div style="color: red;">{{ session('error') }}</div>
     @endif

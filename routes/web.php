@@ -24,23 +24,21 @@ Route::get('/flash', function () {
     return view('flash', ['titre' => 'Mon premier exemple.']);
 });
 
-Route::get('/signin', function () {
-    return view('signin', ['titre' => 'Mon premier exemple.']);
-});
-Route::post('/signin', [AuthController::class, 'signin']);
-
-Route::get('/signup', function () {
-    return view('signup', ['titre' => 'Mon premier exemple.']);
-});
+Route::get('/signup', [AuthController::class, 'signupForm'])->name('signup');
 Route::post('/signup', [AuthController::class, 'signup']);
+
+Route::get('/signin', [AuthController::class, 'signinForm'])->name('login'); // Name login is required by auth middleware defaults
+Route::post('/signin', [AuthController::class, 'signin']);
+Route::get('/signout', [AuthController::class, 'signout']);
 
 Route::get('/ping', [PingPongControleur::class, 'ping']);
 Route::get('/pong', [PingPongControleur::class, 'pong']);
-Route::get('/todo', [TodoController::class, 'todo']);
-Route::get('/todoSupp/{id}', [TodoController::class, 'delTodo']);
-Route::get('/todoMaj/{id}', [TodoController::class, 'majTodo']);
+
+Route::get('/todo', [TodoController::class, 'todo'])->middleware('auth');
+Route::get('/todoSupp/{id}', [TodoController::class, 'delTodo'])->middleware('auth');
+Route::get('/todoMaj/{id}', [TodoController::class, 'majTodo'])->middleware('auth');
 
 Route::get('/flash', [TestFlashController::class, 'main']);
 Route::post('/traitement', [TestFlashController::class, 'traitement']);
-Route::post('/traitement2', [TodoController::class, 'addTodo'])->middleware(CheckTodo::class);
+Route::post('/traitement2', [TodoController::class, 'addTodo'])->middleware(['auth', CheckTodo::class]);
 //Route::post('/traitement2', [TodoController::class, 'delTodo']);
