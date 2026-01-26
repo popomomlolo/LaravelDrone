@@ -34,7 +34,6 @@ Route::get('/signup', function () {
 });
 Route::post('/signup', [AuthController::class, 'signup']);
 
-
 Route::get('/ping', [PingPongControleur::class, 'ping']);
 Route::get('/pong', [PingPongControleur::class, 'pong']);
 Route::get('/todo', [TodoController::class, 'todo']);

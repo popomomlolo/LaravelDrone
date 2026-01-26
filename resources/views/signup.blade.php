@@ -2,12 +2,13 @@
 
 <form action="/signup" method="POST">
     @csrf
+    <input type="text" name="name" placeholder="UserName" required>
     <input type="email" name="email" placeholder="Email" required>
     <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Login</button>
+    <button type="submit">Sign Up</button>
 </form>
 
-<p>Don't have an account? <a href="/signin">Sign in here</a></p>
+<p>Already have an account? <a href="/signin">Login here</a></p>
 
 @if (session('error'))
     <div style="color: red;">{{ session('error') }}</div>

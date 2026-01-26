@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function signin(Request $request)
+    public function signup(Request $request)
     {
         // Créer un nouvel utilisateur
         $utilisateur = Utilisateur::create([
@@ -17,10 +17,10 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect('/signin')->with('success', 'Inscription réussie !');
+        return redirect('/signin')->with('success', 'Inscription réussie ! Veuillez vous connecter.');
     }
 
-    public function signup(Request $request)
+    public function signin(Request $request)
     {
         // Vérifier les identifiants
         $utilisateur = Utilisateur::where('email', $request->email)->first();
@@ -29,7 +29,7 @@ class AuthController extends Controller
             return redirect('/todo')->with('success', 'Connexion réussie !');
         }
 
-        return redirect('/signup')->with('error', 'Email ou mot de passe incorrect.');
+        return redirect('/signin')->with('error', 'Email ou mot de passe incorrect.');
     }
 }
 
