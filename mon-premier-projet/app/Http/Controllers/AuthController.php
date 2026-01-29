@@ -6,20 +6,22 @@ use Illuminate\Http\Request;
 use App\Models\Utilisateur;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use SebastianBergmann\Environment\Console;
+
 
 class AuthController extends Controller
 {
-    public function signupForm()
+    public function inscriptionForm()
     {
-        return view('signup', ['titre' => 'Mon premier exemple.']);
+        return view('inscription', ['titre' => 'Mon premier exemple.']);
     }
 
-    public function signinForm()
+    public function connexionForm()
     {
-        return view('signin', ['titre' => 'Mon premier exemple.']);
+        return view('connexion', ['titre' => 'Mon premier exemple.']);
     }
 
-    public function signup(Request $request)
+    public function inscription(Request $request)
     {
         // Créer un nouvel utilisateur
         $utilisateur = Utilisateur::create([
@@ -27,28 +29,34 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
-        return redirect('/signin')->with('success', 'Inscription réussie ! Veuillez vous connecter.');
+        
+        return redirect('/connexion')->with('success', 'Inscription réussie ! Veuillez vous connecter.');
     }
 
-    public function signin(Request $request)
+    public function connexion(Request $request)
     {
         // Vérifier les identifiants
-        $credentials = $request->only('email', 'password');
+        $mdp = $request->input('password');
+        $email = $request->input('email');
+        $utilisateur = Utilisateur::where('email', $email)->first();
+        
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect('/todo')->with('success', 'Connexion réussie !');
+
+        //$estValide = password_verify($mdp, $utilisateur->password);
+
+        if ($utilisateur!=null && password_verify($mdp, $utilisateur->password)  ) {
+            $request->session()->put('user', $utilisateur);
+            return redirect('/todo');
+        } else {
+            return redirect('/connexion')->with('error', 'Identifiants incorrects');
         }
-
-        return redirect('/signin')->with('error', 'Email ou mot de passe incorrect.');
     }
 
     public function signout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
-        $request->session()->regenerateToken(); 
-        return redirect('/signin');
+        $request->session()->regenerateToken();
+        return redirect('/connexion');
     }
 }

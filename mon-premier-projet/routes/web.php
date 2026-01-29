@@ -6,6 +6,8 @@ use App\Http\Controllers\TestFlashController;
 use App\Http\Controllers\TodoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Middleware\CheckTodo;
+use App\Http\Middleware\CheckAuth;
+
 
 
 Route::get('/', function () {
@@ -24,19 +26,19 @@ Route::get('/flash', function () {
     return view('flash', ['titre' => 'Mon premier exemple.']);
 });
 
-Route::get('/signup', [AuthController::class, 'signupForm'])->name('signup');
-Route::post('/signup', [AuthController::class, 'signup']);
+Route::get('/inscription', [AuthController::class, 'inscriptionForm'])->name('inscription');
+Route::post('/inscription', [AuthController::class, 'inscription']);
 
-Route::get('/signin', [AuthController::class, 'signinForm'])->name('login'); // Name login is required by auth middleware defaults
-Route::post('/signin', [AuthController::class, 'signin']);
-Route::get('/signout', [AuthController::class, 'signout']);
+Route::get('/connexion', [AuthController::class, 'connexionForm'])->name('login'); // Name login is required by auth middleware defaults
+Route::post('/validerconnexion', [AuthController::class, 'connexion']);
+Route::get('/deconnexion', [AuthController::class, 'signout']);
 
 Route::get('/ping', [PingPongControleur::class, 'ping']);
 Route::get('/pong', [PingPongControleur::class, 'pong']);
 
-Route::get('/todo', [TodoController::class, 'todo'])->middleware('auth');
-Route::get('/todoSupp/{id}', [TodoController::class, 'delTodo'])->middleware('auth');
-Route::get('/todoMaj/{id}', [TodoController::class, 'majTodo'])->middleware('auth');
+Route::get('/todo', [TodoController::class, 'todo'])->middleware('CheckAuth');
+Route::get('/todoSupp/{id}', [TodoController::class, 'delTodo'])/*->middleware('CheckAuth')*/;
+Route::get('/todoMaj/{id}', [TodoController::class, 'majTodo'])/*->middleware('CheckAuth')*/;
 
 Route::get('/flash', [TestFlashController::class, 'main']);
 Route::post('/traitement', [TestFlashController::class, 'traitement']);
