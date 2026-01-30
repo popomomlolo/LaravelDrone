@@ -36,7 +36,10 @@ Route::get('/deconnexion', [AuthController::class, 'signout']);
 Route::get('/ping', [PingPongControleur::class, 'ping']);
 Route::get('/pong', [PingPongControleur::class, 'pong']);
 
-Route::get('/todo', [TodoController::class, 'todo'])->middleware('CheckAuth');
+//Route::get('/todo', [TodoController::class, 'todo'])->middleware('CheckAuth');
+Route::get('/todo', [TodoController::class, 'todo'])->middleware(\App\Http\Middleware\CheckAuth::class);
+
+
 Route::get('/todoSupp/{id}', [TodoController::class, 'delTodo'])/*->middleware('CheckAuth')*/;
 Route::get('/todoMaj/{id}', [TodoController::class, 'majTodo'])/*->middleware('CheckAuth')*/;
 

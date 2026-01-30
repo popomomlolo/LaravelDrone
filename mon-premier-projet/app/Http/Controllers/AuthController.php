@@ -40,8 +40,6 @@ class AuthController extends Controller
         $email = $request->input('email');
         $utilisateur = Utilisateur::where('email', $email)->first();
         
-
-
         //$estValide = password_verify($mdp, $utilisateur->password);
 
         if ($utilisateur!=null && password_verify($mdp, $utilisateur->password)  ) {
