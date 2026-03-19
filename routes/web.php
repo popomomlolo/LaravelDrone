@@ -31,7 +31,11 @@ Route::get('/apprenti-form', [ApprentisController::class, 'showForm']);
 Route::post('/apprentis', [ApprentisController::class, 'submitForm']);
 
 Route::get('/apprentis', [ApprentisController::class, 'showApprentis']);
-Route::post('/apprentis', [ApprentisController::class, 'submitForm']);
+Route::post('/apprentis/supprimer', [ApprentisController::class, 'supprimer']);
+Route::post('/apprentis/modifier', [ApprentisController::class, 'modifierForm']);
+Route::post('/apprentis/update', [ApprentisController::class, 'update']);
+Route::post('/apprentis/ajouter', [ApprentisController::class, 'ajouter']);
+Route::post('/apprentis/import-csv', [ApprentisController::class, 'importCsv']);
 
 Route::get('/api/apprentis', [ApprentisController::class, 'getApprentis']);
 
