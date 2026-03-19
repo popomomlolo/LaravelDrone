@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApprentisController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PingPongControleur;
 use App\Http\Controllers\TestFlashController;
@@ -23,6 +24,16 @@ Route::get('/pong', function () {
 Route::get('/flash', function () {
     return view('flash', ['titre' => 'Mon premier exemple.']);
 });
+
+//Route::get('/*', [ApprentisController::class, 'show*']);
+
+Route::get('/apprenti-form', [ApprentisController::class, 'showForm']);
+Route::post('/apprentis', [ApprentisController::class, 'submitForm']);
+
+Route::get('/apprentis', [ApprentisController::class, 'showApprentis']);
+Route::post('/apprentis', [ApprentisController::class, 'submitForm']);
+
+Route::get('/api/apprentis', [ApprentisController::class, 'getApprentis']);
 
 Route::get('/signup', [AuthController::class, 'signupForm'])->name('signup');
 Route::post('/signup', [AuthController::class, 'signup']);
