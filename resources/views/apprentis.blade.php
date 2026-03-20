@@ -85,7 +85,7 @@
     </div>
 
     {{-- Tableau des apprentis --}}
-    <table border="1" cellpadding="8">
+    <table id="apprentisTable" class="display" style="width:100%">
         <thead>
             <tr>
                 <th>ID</th>
@@ -103,6 +103,15 @@
             @endforeach
         </tbody>
     </table>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#apprentisTable').DataTable();
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
