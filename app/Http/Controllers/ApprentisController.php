@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Apprenti;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ApprentisController extends Controller
 {
@@ -14,7 +15,7 @@ class ApprentisController extends Controller
 
     public function getApprentis()
     {
-        $apprentis = Apprenti::select('id', 'nom', 'prenom')
+        $apprentis = Apprenti::select('id_apprentis', 'nom', 'prenom')
                          ->orderBy('nom')
                          ->get();
         return response()->json($apprentis);
@@ -30,9 +31,10 @@ class ApprentisController extends Controller
     {
         $apprenti = Apprenti::find($request->apprenti_id);
         if ($apprenti) {
+            \DB::table('sessions_drone')->where('id_apprentis', $request->apprenti_id)->delete();
             $apprenti->delete();
         }
-        return redirect('/apprentis');
+        return redirect('/apprentis')->with('success', 'Apprenti supprimé avec succès');
     }
 
     public function modifierForm(Request $request)
@@ -68,7 +70,7 @@ class ApprentisController extends Controller
         $file = fopen($request->file('csv_file')->getRealPath(), 'r');
         $firstLine = true;
         while (($row = fgetcsv($file, 1000, ',')) !== false) {
-            if ($firstLine) { $firstLine = false; continue; } // skip header
+            if ($firstLine) { $firstLine = false; continue; }
             if (count($row) >= 2) {
                 Apprenti::create([
                     'nom' => trim($row[0]),

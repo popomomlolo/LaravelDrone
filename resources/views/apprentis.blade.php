@@ -9,40 +9,13 @@
         <div style="color: green;">{{ session('success') }}</div>
     @endif
 
-    {{-- Sélection d'un apprenti --}}
-    <div style="margin-bottom: 1rem;">
-        <label for="apprenti">Sélectionner un apprenti :</label>
-        <select id="apprenti_select">
-            @foreach ($apprentis as $a)
-                <option value="{{ $a->id }}" data-nom="{{ $a->nom }}" data-prenom="{{ $a->prenom }}"
-                    {{ isset($apprenti) && $apprenti->id == $a->id ? 'selected' : '' }}>
-                    {{ $a->nom }} {{ $a->prenom }}
-                </option>
-            @endforeach
-        </select>
-
-        {{-- Bouton Modifier --}}
-        <form action="/apprentis/modifier" method="POST" style="display:inline-block;">
-            @csrf
-            <input type="hidden" name="apprenti_id" id="modifier_id">
-            <button type="submit">Modifier</button>
-        </form>
-
-        {{-- Bouton Supprimer --}}
-        <form action="/apprentis/supprimer" method="POST" style="display:inline-block; margin-left: 0.5rem;">
-            @csrf
-            <input type="hidden" name="apprenti_id" id="supprimer_id">
-            <button type="submit" style="background: #dc3545; color: #fff; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">Supprimer</button>
-        </form>
-    </div>
-
     {{-- Formulaire de modification --}}
     @if (isset($apprenti))
         <div style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;">
             <h3>Modifier l'apprenti</h3>
             <form action="/apprentis/update" method="POST">
                 @csrf
-                <input type="hidden" name="apprenti_id" value="{{ $apprenti->id }}">
+                <input type="hidden" name="apprenti_id" value="{{ $apprenti->id_apprentis }}">
                 <div style="margin-bottom: 0.5rem;">
                     <label>Nom :</label>
                     <input type="text" name="nom" value="{{ $apprenti->nom }}" required>
@@ -91,18 +64,40 @@
                 <th>ID</th>
                 <th>Nom</th>
                 <th>Prénom</th>
+                <th>ID Classe</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($apprentis as $a)
-                <tr>
-                    <td>{{ $a->id }}</td>
+                <tr data-id="{{ $a->id_apprentis }}" data-nom="{{ $a->nom }}" data-prenom="{{ $a->prenom }}" data-id_classes="{{ $a->id_classes }}">
+                    <td>{{ $a->id_apprentis }}</td>
                     <td>{{ $a->nom }}</td>
                     <td>{{ $a->prenom }}</td>
+                    <td>{{ $a->id_classes}}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
+
+    <!-- Modal -->
+    <div id="apprentiModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:2rem; border-radius:8px; min-width:300px; max-width:400px; margin:auto; position:relative;">
+            <span id="closeModal" style="position:absolute; top:8px; right:12px; cursor:pointer; font-size:1.5rem;">&times;</span>
+            <h3 id="modalNom"></h3>
+            <p><strong>Prénom :</strong> <span id="modalPrenom"></span></p>
+            <p><strong>ID Classe :</strong> <span id="modalClasse"></span></p>
+            <form id="modalSupprimerForm" action="/apprentis/supprimer" method="POST" style="margin-bottom:1rem;">
+                @csrf
+                <input type="hidden" name="apprenti_id" id="modalSupprimerId">
+                <button type="submit" style="background:#dc3545; color:#fff; border:none; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;">Supprimer</button>
+            </form>
+            <form id="modalModifierForm" action="/apprentis/modifier" method="POST">
+                @csrf
+                <input type="hidden" name="apprenti_id" id="modalModifierId">
+                <button type="submit" style="background:#007bff; color:#fff; border:none; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;">Modifier</button>
+            </form>
+        </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -110,6 +105,26 @@
     <script>
         $(document).ready(function() {
             $('#apprentisTable').DataTable();
+            $('#apprentisTable tbody').on('click', 'tr', function() {
+                var id = $(this).data('id');
+                var nom = $(this).data('nom');
+                var prenom = $(this).data('prenom');
+                var classe = $(this).data('id_classes');
+                $('#modalNom').text(nom);
+                $('#modalPrenom').text(prenom);
+                $('#modalClasse').text(classe);
+                $('#modalSupprimerId').val(id);
+                $('#modalModifierId').val(id);
+                $('#apprentiModal').css('display', 'flex');
+            });
+            $('#closeModal').on('click', function() {
+                $('#apprentiModal').hide();
+            });
+            $('#apprentiModal').on('click', function(e) {
+                if (e.target === this) {
+                    $(this).hide();
+                }
+            });
         });
     </script>
 

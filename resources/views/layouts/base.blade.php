@@ -59,6 +59,17 @@
       .m-b-md {
         margin-bottom: 30px;
       }
+
+              /* ── Sidebar ── */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            top: 0; left: 0;
+        }
     </style>
   </head>
   <body>
@@ -76,5 +87,20 @@
 
       <div class="content">@yield('content')</div>
     </div>
+
+        <!-- Sidebar -->
+    <aside class="sidebar">
+        <a class="logo" href="/"><span>LARAVEL DRONE</span></a>
+        <nav class="d-flex flex-column gap-1">
+            <a href="{{ route('historique.index') }}"
+               class="nav-link {{ request()->routeIs('historique.*') ? 'active' : '' }}">
+                📋 Historique
+            </a><br>
+
+        </nav>
+    </aside>
+
+
+    
   </body>
 </html>

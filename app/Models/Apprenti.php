@@ -8,5 +8,8 @@ class Apprenti extends Model
 {
     protected $table = 'apprentis';
     public $timestamps = false; // Si pas de created_at/updated_at
-    protected $fillable = ['nom', 'prenom'];
+    protected $fillable = ['nom', 'prenom', 'id_classes'];
+    protected $primaryKey = 'id_apprentis';
+    public $incrementing = true;
+    protected $keyType = 'int';
 }

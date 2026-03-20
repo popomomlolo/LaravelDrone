@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Sélectionner un apprenti</h1>
-    <form action="/apprentis" method="POST">
+    <form action="/apprentis/modifier" method="POST">
         @csrf
         <label for="apprenti">Nom :</label>
         <select name="apprenti_id" id="apprenti">

@@ -57,3 +57,7 @@ Route::get('/flash', [TestFlashController::class, 'main']);
 Route::post('/traitement', [TestFlashController::class, 'traitement']);
 Route::post('/traitement2', [TodoController::class, 'addTodo'])->middleware(['auth', CheckTodo::class]);
 //Route::post('/traitement2', [TodoController::class, 'delTodo']);
+
+Route::get('/historique', function () {
+    return view('historique');
+})->name('historique.index');

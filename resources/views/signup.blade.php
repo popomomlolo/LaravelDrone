@@ -5,8 +5,9 @@
 
     <form action="/signup" method="POST">
         @csrf
-        <input type="text" name="name" placeholder="UserName" required>
-        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="nom" placeholder="Nom" required>
+        <input type="text" name="prenom" placeholder="Prénom" required>
+        <input type="text" name="login" placeholder="Login" required>
         <input type="password" name="password" placeholder="Password" required>
         <button type="submit">Sign Up</button>
     </form>
