@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sessions extends Model
 {
-    protected $table = 'sessions';
+    protected $table = 'sessions_drone';
     protected $primaryKey = 'id_sessions';
 
     protected $fillable = [
