@@ -238,7 +238,7 @@
             </a><br>
             <a href="{{ route('statistique.index') }}"
                class="nav-link {{ request()->routeIs('statistique.*') ? 'active' : '' }}">
-                📋 Statistique
+                📊 Statistique
             </a><br>
 
         </nav>
