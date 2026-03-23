@@ -31,7 +31,7 @@ class ApprentisController extends Controller
     {
         $apprenti = Apprenti::find($request->apprenti_id);
         if ($apprenti) {
-            \DB::table('sessions_drone')->where('id_apprentis', $request->apprenti_id)->delete();
+            DB::table('sessions_drone')->where('id_apprentis', $request->apprenti_id)->delete();
             $apprenti->delete();
         }
         return redirect('/apprentis')->with('success', 'Apprenti supprimé avec succès');
@@ -50,6 +50,7 @@ class ApprentisController extends Controller
         if ($apprenti) {
             $apprenti->nom = $request->nom;
             $apprenti->prenom = $request->prenom;
+            $apprenti->id_classes = $request->id_classes;
             $apprenti->save();
         }
         return redirect('/apprentis')->with('success', 'Apprenti modifié avec succès');
@@ -60,6 +61,7 @@ class ApprentisController extends Controller
         Apprenti::create([
             'nom' => $request->nom,
             'prenom' => $request->prenom,
+            'id_classes' => $request->id_classes,
         ]);
         return redirect('/apprentis')->with('success', 'Apprenti ajouté avec succès');
     }
@@ -75,6 +77,7 @@ class ApprentisController extends Controller
                 Apprenti::create([
                     'nom' => trim($row[0]),
                     'prenom' => trim($row[1]),
+                    'id_classes' => trim($row[2]),
                 ]);
             }
         }

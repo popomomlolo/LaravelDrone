@@ -24,6 +24,10 @@
                     <label>Prénom :</label>
                     <input type="text" name="prenom" value="{{ $apprenti->prenom }}" required>
                 </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <label>ID Classe :</label>
+                        <input type="number" name="id_classes" value="{{ $apprenti->id_classes }}" required>
+                </div>
                 <button type="submit">Enregistrer</button>
             </form>
         </div>
@@ -42,6 +46,11 @@
                 <label>Prénom :</label>
                 <input type="text" name="prenom" placeholder="Prénom" required>
             </div>
+
+                <div style="margin-bottom: 0.5rem;">
+                    <label>ID Classe :</label>
+                    <input type="number" name="id_classes" placeholder="ID Classe" required>
+                </div>
             <button type="submit" style="background: #28a745; color: #fff; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">Ajouter</button>
         </form>
     </div>
@@ -49,7 +58,7 @@
     {{-- Import CSV --}}
     <div style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;">
         <h3>Importer plusieurs apprentis (CSV)</h3>
-        <p style="font-size: 0.85rem; color: #666;">Format du fichier : <code>nom,prenom</code> (avec entête)</p>
+        <p style="font-size: 0.85rem; color: #666;">Format du fichier : <code>nom,prenom,id_classes</code> (avec entête)</p>
         <form action="/apprentis/import-csv" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="file" name="csv_file" accept=".csv,.txt" required>
