@@ -30,7 +30,7 @@ Route::get('/flash', function () {
 Route::get('/apprenti-form', [ApprentisController::class, 'showForm']);
 Route::post('/apprentis', [ApprentisController::class, 'submitForm']);
 
-Route::get('/apprentis', [ApprentisController::class, 'showApprentis']);
+Route::get('/apprentis', [ApprentisController::class, 'showApprentis'])->name('apprentis.index');
 Route::post('/apprentis/supprimer', [ApprentisController::class, 'supprimer']);
 Route::post('/apprentis/modifier', [ApprentisController::class, 'modifierForm']);
 Route::post('/apprentis/update', [ApprentisController::class, 'update']);

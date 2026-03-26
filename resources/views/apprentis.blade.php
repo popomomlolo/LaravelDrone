@@ -11,7 +11,7 @@
 
     {{-- Formulaire de modification --}}
     @if (isset($apprenti))
-        <div style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;">
+        <div id="formModifier" style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;">
             <h3>Modifier l'apprenti</h3>
             <form action="/apprentis/update" method="POST">
                 @csrf
@@ -33,8 +33,14 @@
         </div>
     @endif
 
+    {{-- Boutons pour afficher/masquer les formulaires --}}
+    <div style="margin-bottom: 1.5rem;">
+        <button id="btnAjouter" type="button" style="background: #28a745; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;">+ Ajouter un apprenti</button>
+        <button id="btnImport" type="button" style="background: #007bff; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Importer CSV</button>
+    </div>
+
     {{-- Formulaire d'ajout --}}
-    <div style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;">
+    <div id="formAjouter" style="display: none; margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;">
         <h3>Ajouter un apprenti</h3>
         <form action="/apprentis/ajouter" method="POST">
             @csrf
@@ -56,7 +62,7 @@
     </div>
 
     {{-- Import CSV --}}
-    <div style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;">
+    <div id="formImport" style="display: none; margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;">
         <h3>Importer plusieurs apprentis (CSV)</h3>
         <p style="font-size: 0.85rem; color: #666;">Format du fichier : <code>nom,prenom,id_classes</code> (avec entête)</p>
         <form action="/apprentis/import-csv" method="POST" enctype="multipart/form-data">
@@ -138,18 +144,38 @@
     </script>
 
     <script>
+        // Toggle pour afficher/masquer les formulaires
         document.addEventListener('DOMContentLoaded', function () {
-            var select = document.getElementById('apprenti_select');
-            var modifierId = document.getElementById('modifier_id');
-            var supprimerId = document.getElementById('supprimer_id');
+            var btnAjouter = document.getElementById('btnAjouter');
+            var btnImport = document.getElementById('btnImport');
+            var formAjouter = document.getElementById('formAjouter');
+            var formImport = document.getElementById('formImport');
+            var formModifier = document.getElementById('formModifier');
+            btnAjouter.addEventListener('click', function() {
+                if (formAjouter.style.display === 'none') {
+                    formAjouter.style.display = 'block';
+                    formImport.style.display = 'none';
+                    formModifier.style.display = 'none';
+                    btnAjouter.style.background = '#218838';
+                    btnImport.style.background = '#007bff';
+                } else {
+                    formAjouter.style.display = 'none';
+                    btnAjouter.style.background = '#28a745';
+                }
+            });
 
-            function sync() {
-                modifierId.value = select.value;
-                supprimerId.value = select.value;
-            }
-
-            select.addEventListener('change', sync);
-            sync();
+            btnImport.addEventListener('click', function() {
+                if (formImport.style.display === 'none') {
+                    formImport.style.display = 'block';
+                    formAjouter.style.display = 'none';
+                    formModifier.style.display = 'none';
+                    btnImport.style.background = '#0056b3';
+                    btnAjouter.style.background = '#28a745';
+                } else {
+                    formImport.style.display = 'none';
+                    btnImport.style.background = '#007bff';
+                }
+            });
         });
     </script>
 @endsection

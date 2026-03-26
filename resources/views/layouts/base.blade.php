@@ -96,6 +96,10 @@
                class="nav-link {{ request()->routeIs('historique.*') ? 'active' : '' }}">
                 📋 Historique
             </a><br>
+              <a href="{{ route('apprentis.index') }}"
+                class="nav-link {{ request()->routeIs('apprentis.*') ? 'active' : '' }}">
+                  👨‍🎓 Apprentis
+              </a><br>
 
         </nav>
     </aside>
