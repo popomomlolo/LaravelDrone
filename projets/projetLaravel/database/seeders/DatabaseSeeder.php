@@ -45,11 +45,11 @@ class DatabaseSeeder extends Seeder
 
         // ── 4. OBJECTIFS ─────────────────────────────────────────────
         DB::table('objectifs')->insert([
-            ['libelle_objectifs' => 'Décollage et atterrissage',   'est_automatique' => false],
-            ['libelle_objectifs' => 'Vol en ligne droite 100m',    'est_automatique' => false],
-            ['libelle_objectifs' => 'Virage à gauche et droite',   'est_automatique' => false],
-            ['libelle_objectifs' => 'Retour automatique au point', 'est_automatique' => true],
-            ['libelle_objectifs' => 'Maintien de altitude auto',   'est_automatique' => true],
+            ['libelle_objectifs' => 'passage dans un cerceau',   'est_automatique' => true],
+            ['libelle_objectifs' => 'atterrissage sur une plateforme',    'est_automatique' => true],
+            ['libelle_objectifs' => 'positionnement au-dessus d\'un bâtiment',   'est_automatique' => true],
+            ['libelle_objectifs' => 'maintien d\'altitude', 'est_automatique' => false],
+            ['libelle_objectifs' => 'tours autour d\'un obstacle',   'est_automatique' => false],
         ]);
 
         // ── 5. SESSIONS ──────────────────────────────────────────────

@@ -5,15 +5,15 @@ use App\Http\Controllers\apprentisControlleur;
 use App\Http\Controllers\historiqueControlleur;
 use App\Http\Controllers\statistiqueControlleur;
 
-// Redirection racine vers historique
-//Route::get('/', fn() => redirect()->route('historique.index'));
+Route::get('/', fn() => redirect()->route('historique.index'));
 
-Route::get('/', fn() => view('acceuil'));
-
-// ── Historique ──
+// Historique
 Route::get('/historique', [historiqueControlleur::class, 'index'])->name('historique.index');
 
-// ── Statistiques ──
-Route::get('/statistique', [statistiqueControlleur::class, 'index'])->name('statistique.index');
+// Apprentis
+Route::get('/apprentis',      [apprentisControlleur::class, 'index'])->name('apprentis.index');
+Route::get('/apprentis/{id}', [apprentisControlleur::class, 'show'])->name('apprentis.show');
 
-Route::get('/signin', [AuthController::class, 'signinForm'])->name('login');
+// Statistiques
+Route::get('/statistique',         [statistiqueControlleur::class, 'index'])->name('statistique.index');
+Route::get('/statistique/filtrer', [statistiqueControlleur::class, 'filtrer'])->name('statistique.filtrer');
