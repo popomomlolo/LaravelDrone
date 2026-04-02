@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
 {
     Schema::create('valider', function (Blueprint $table) {
-    $table->unsignedBigInteger('id_sessions'); // ✅
+    $table->unsignedBigInteger('id_sessions'); // 
     $table->foreign('id_sessions')
           ->references('id_sessions')
-          ->on('sessions_drone') // ✅ nom réel de la table
+          ->on('sessions_drone') // nom réel de la table
           ->onDelete('cascade');
 
-    $table->unsignedBigInteger('id_objectifs'); // ✅
+    $table->unsignedBigInteger('id_objectifs'); // 
     $table->foreign('id_objectifs')
           ->references('id_objectifs')
           ->on('objectifs')

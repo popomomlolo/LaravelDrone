@@ -59,25 +59,24 @@ function initChart(apprentis) {
         },
         subtitle: {
             text: "Nombre d'apprentis ayant réussi ou échoué chaque objectif (" + total + " apprentis)",
-            style: { color: '#636b6f', fontSize: '0.8rem' }
+            style: { color: '#636b6f', fontSize: '15px' }
         },
         tooltip: {
             outside: true,
             formatter: function () {
-                return '<b>' + this.series.name + '</b><br>' +
-                       this.x + '<br>' +
+                return '<b>' + this.series.name + '</b><br>' + //Mot reussi ou echoué
                        '<span style="color:' + this.color + '">●</span> ' +
                        '<b>' + this.y + '</b> / ' + total + ' apprentis';
             }
         },
         pane: {
-            size: '85%',
+            size: '100%',
             innerSize: '20%',
             endAngle: 270
         },
-        xAxis: {
+        xAxis: { //Titre entre chaque barre
             tickInterval: 1,
-            labels: { align: 'right', allowOverlap: true, step: 1, y: 3, style: { fontSize: '12px', color: '#333' } },
+            labels: { align: 'right', allowOverlap: true, step: 1, y: 3, style: { fontSize: '16px', color: '#333', fontWeight: 'bold' } },
             lineWidth: 0,
             gridLineWidth: 0,
             categories: categories

@@ -15,7 +15,7 @@ public function up(): void
         $table->id('id_apprentis');
         $table->string('nom');
         $table->string('prenom');
-        $table->unsignedBigInteger('id_classes'); // ✅ même type que id() de classes
+        $table->unsignedBigInteger('id_classes'); // même type que id() de classes
         $table->foreign('id_classes')
               ->references('id_classes')
               ->on('classes')

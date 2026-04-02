@@ -23,7 +23,7 @@ return new class extends Migration
         $table->foreign('login')
               ->references('login')->on('formateurs')
               ->onDelete('restrict');
-        $table->unsignedBigInteger('id_apprentis'); // ✅
+        $table->unsignedBigInteger('id_apprentis'); // 
 $table->foreign('id_apprentis')
       ->references('id_apprentis')
       ->on('apprentis')
