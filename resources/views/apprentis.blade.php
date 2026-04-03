@@ -131,7 +131,7 @@
         style="display: none; margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;"
     >
         <h3>Importer plusieurs apprentis (CSV)</h3>
-        <p style="font-size: 0.85rem; color: #666;">Format du fichier : <code>nom,prenom,id_classes</code> (avec entête)</p>
+        <p style="font-size: 0.85rem; color: #666;">Format du fichier : <code>nom,prenom,libelle_classes</code> (avec entête — la classe sera créée si elle n'existe pas)</p>
         <form
             action="/apprentis/import-csv"
             method="POST"
@@ -185,11 +185,12 @@
 
     <!-- Modal -->
     <div
+        class="modal-overlay"
         id="apprentiModal"
         style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:1000; align-items:center; justify-content:center;"
     >
         <div
-            style="background:#fff; padding:2rem; border-radius:8px; min-width:300px; max-width:400px; margin:auto; position:relative;">
+            style="box-shadow: 0 20px 60px rgba(255, 0, 0, 1); background:#000000; padding:2rem; border-radius:8px; min-width:300px; max-width:400px; margin:auto; position:relative;">
             <span
                 id="closeModal"
                 style="position:absolute; top:8px; right:12px; cursor:pointer; font-size:1.5rem;"

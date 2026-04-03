@@ -2,65 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\statistiqueExport;
 use App\Models\Classes;
 use App\Models\Apprentis;
 use App\Models\Objectifs;
+use App\Exports\statistiqueExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class statistiqueControlleur extends Controller
 {
-    /**
-     * Page principale — envoie juste les listes des combobox
-     */
     public function index()
     {
-        $classes   = Classes::orderBy('libelle_classes')->get();    //recupere les classes pour la combobox
-        $objectifs = Objectifs::orderBy('libelle_objectifs')->get(); //recupere les objectifs pour la combobox
+        $classes   = Classes::orderBy('libelle_classes')->get();
+        $objectifs = Objectifs::orderBy('libelle_objectifs')->get();
+        $apprentis = Apprentis::orderBy('nom')->get();
 
-        return view('statistique', compact('classes', 'objectifs')); //retourne les 2 val a la vue
+        return view('statistique', compact('classes', 'objectifs', 'apprentis'));
     }
 
-    /**
-     * Route AJAX — retourne les apprentis filtrés en JSON
-     */
     public function filtrer()
     {
-        $idClasse   = request('id_classes');  // Récupère les paramètres de filtrage classe
-        $idObjectif = request('id_objectifs'); // Récupère les paramètres de filtrage objectif
+        $idClasse   = request('id_classes');
+        $idObjectif = request('id_objectifs');
 
-        // Au moins un filtre doit être renseigné
         if (!$idClasse && !$idObjectif) {
-            return response()->json([]); //Envoie le json vide si aucun filtre n'est renseigné
+            return response()->json([]);
         }
 
-        $query = Apprentis::with([// Requête de base avec les relations nécessaires
-            'classes',            //nom de la classe
-            'sessions.objectifs', //recupere la table valider a l'aide d'objectif
-        ]);
+        $query = Apprentis::with(['classes', 'sessions.objectifs']);
 
-        // Filtre par classe
         if ($idClasse) {
-            $query->where('id_classes', $idClasse); //Mets idClasse de la combobox dans le filtre
+            $query->where('id_classes', $idClasse);
         }
 
-        // Filtre par objectif : ne garde que les apprentis
-        // ayant au moins une session avec cet objectif
         if ($idObjectif) {
             $query->whereHas('sessions.objectifs', function ($q) use ($idObjectif) {
-                $q->where('objectifs.id_objectifs', $idObjectif); //Mets idObjectif de la combobox dans le filtre
+                $q->where('objectifs.id_objectifs', $idObjectif);
             });
         }
 
-        $apprentis = $query->orderBy('nom')->get(); // Recupere les apprentis par ordre alphabetique
+        $apprentis = $query->orderBy('nom')->get();
 
-        // Construction du tableau de résultats
         $result = $apprentis->map(function ($apprenti) {
-            // Sessions avec leurs objectifs
             $sessions = $apprenti->sessions->map(function ($session) {
                 $objectifs = $session->objectifs->map(function ($obj) {
                     return [
-                        'libelle' => $obj->libelle_objectifs,
-                        'reussi'  => (bool) $obj->pivot->reussi,
+                        'libelle'              => $obj->libelle_objectifs,
+                        'reussi'               => (bool) $obj->pivot->reussi,
                         'quantite_a_atteindre' => $obj->pivot->quantite_a_atteindre,
                         'quantite_realisee'    => $obj->pivot->quantite_realisee,
                     ];
@@ -89,4 +77,33 @@ class statistiqueControlleur extends Controller
         return response()->json($result);
     }
 
+    /**
+     * Export CSV — filtré par apprentis et/ou classe
+     */
+    public function exportCsv()
+    {
+        $idApprentis = request('id_apprentis');
+        $idClasses   = request('id_classes');
+
+        return Excel::download(
+            new statistiqueExport($idApprentis, $idClasses),
+            'resultats_' . now()->format('Ymd_His') . '.csv',
+            \Maatwebsite\Excel\Excel::CSV,
+            ['Content-Type' => 'text/csv; charset=UTF-8']
+        );
+    }
+
+    /**
+     * Export PDF — une page par classe
+     */
+    public function exportPdf()
+    {
+        $html = statistiqueExport::genererHtmlPdf();
+
+        $pdf = Pdf::loadHTML($html)
+            ->setPaper('a4', 'landscape')
+            ->setOptions(['defaultFont' => 'Arial', 'isHtml5ParserEnabled' => true]);
+
+        return $pdf->download('resultats_classes_' . now()->format('Ymd_His') . '.pdf');
+    }
 }

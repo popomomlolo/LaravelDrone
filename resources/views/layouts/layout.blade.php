@@ -211,23 +211,99 @@
             color: var(--muted);
             font-size: 0.82rem;
         }
+
+            .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal-box {
+        background: #000000;
+        border-radius: 12px;
+        padding: 2rem;
+        width: 500px;
+        max-width: 90vw;
+        box-shadow: 0 20px 60px rgba(255, 0, 0, 1);
+        position: relative;
+        font-family: 'Raleway', sans-serif;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1.25rem;
+        background: none;
+        border: none;
+        font-size: 1.4rem;
+        cursor: pointer;
+        color: #636b6f;
+        line-height: 1;
+    }
+
+    .modal-close:hover { color: #000; }
+
+    .modal-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .modal-classe {
+        color: #636b6f;
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-section-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #636b6f;
+        margin-bottom: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .objectif-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        padding: 0.3rem 0;
+        border-bottom: 1px solid #ffffff;
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .dot.reussi  { background: #22c55e; }
+    .dot.echoue  { background: #ef4444; }
+
+    .empty-msg {
+        color: #636b6f;
+        font-size: 0.875rem;
+        font-style: italic;
+    }
     </style>
 
     @stack('styles')
 </head>
 
 <body>
-    <div class="flex-center position-ref full-height">
-      @if (Route::has('login'))
-      <div class="top-right links">
-        @auth
-        <a href="{{ url('/home') }}">Home</a>
-        @else
-        <a href="{{ route('login') }}">Login</a>
-
-        @endauth
-      </div>
-      @endif
+    
     <!-- Sidebar -->
     <aside class="sidebar">
         <a class="logo" href="/"><span>LARAVEL DRONE</span></a>

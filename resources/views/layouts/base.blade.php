@@ -162,7 +162,7 @@
         padding: 2rem;
         width: 500px;
         max-width: 90vw;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        box-shadow: 0 20px 60px rgba(255, 0, 0, 0.2);
         position: relative;
         font-family: 'Raleway', sans-serif;
     }

@@ -75,20 +75,29 @@ class ApprentisController extends Controller
         $request->validate(['csv_file' => 'required|file|mimes:csv,txt']);
         $file = fopen($request->file('csv_file')->getRealPath(), 'r');
         $firstLine = true;
+        $count = 0;
         while (($row = fgetcsv($file, 1000, ',')) !== false) {
             if ($firstLine) {
                 $firstLine = false;
                 continue;
             }
-            if (count($row) >= 2) {
+            if (count($row) >= 3) {
+                $libelleClasse = trim($row[2]);
+
+                // Cherche la classe par son libellé, la crée si elle n'existe pas
+                $classe = Classes::firstOrCreate(
+                    ['libelle_classes' => $libelleClasse]
+                );
+
                 Apprenti::create([
-                    'nom' => trim($row[0]),
-                    'prenom' => trim($row[1]),
-                    'id_classes' => trim($row[2]),
+                    'nom'        => trim($row[0]),
+                    'prenom'     => trim($row[1]),
+                    'id_classes' => $classe->id_classes,
                 ]);
+                $count++;
             }
         }
         fclose($file);
-        return redirect('/apprentis')->with('success', 'Apprentis importés avec succès');
+        return redirect('/apprentis')->with('success', $count . ' apprenti(s) importé(s) avec succès');
     }
 }
