@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Apprenti;
+use App\Models\Classes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -25,7 +26,8 @@ class ApprentisController extends Controller
     public function showApprentis()
     {
         $apprentis = Apprenti::orderBy('nom')->get();
-        return view('apprentis', compact('apprentis'));
+        $classes = Classes::pluck('libelle_classes', 'id_classes');
+        return view('apprentis', compact('apprentis', 'classes'));
     }
 
     public function supprimer(Request $request)
@@ -42,7 +44,8 @@ class ApprentisController extends Controller
     {
         $apprenti = Apprenti::find($request->apprenti_id);
         $apprentis = Apprenti::orderBy('nom')->get();
-        return view('apprentis', compact('apprentis', 'apprenti'));
+        $classes = Classes::pluck('libelle_classes', 'id_classes');
+        return view('apprentis', compact('apprentis', 'apprenti', 'classes'));
     }
 
     public function update(Request $request)

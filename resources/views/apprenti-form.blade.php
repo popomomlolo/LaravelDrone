@@ -9,7 +9,7 @@
         <label for="apprenti">Nom :</label>
         <select name="apprenti_id" id="apprenti">
             @foreach ($apprentis as $apprenti)
-                <option value="{{ $apprenti->id }}">{{ $apprenti->nom }} {{ $apprenti->prenom }}</option>
+                <option value="{{ $apprenti->id }}">{{ $apprenti->nom }} {{ $apprenti->prenom }} ({{ $classes[$apprenti->id]->libelle_classe }})</option>
             @endforeach
         </select>
         <button type="submit">Valider</button>
