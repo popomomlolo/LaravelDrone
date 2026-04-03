@@ -1,0 +1,24 @@
+{
+  "Objectifs": {
+    "atterrissage": false,
+    "cerceaux": 4,
+    "maintien_altitude": false,
+    "positionnement": true,
+    "tours": true
+  },
+  "Vue": {
+    "DroneAssistee": true,
+    "Duree": 15,
+    "Interieur": false,
+    "Meteo": 2,
+    "Temps": true,
+    "Vent": {
+      "direction": {
+        "norme": 44,
+        "x": -39.540914846950386,
+        "y": -19.285392752565432,
+        "z": -0.7679058832404745
+      }
+    }
+  }
+}
