@@ -1,4 +1,4 @@
-@extends('layouts.base')
+@extends('layouts.layout')
 
 @section('title', 'Liste des apprentis')
 
@@ -241,7 +241,11 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#apprentisTable').DataTable();
+            $('#apprentisTable').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+                }
+            });
             $('#apprentisTable tbody').on('click', 'tr', function() {
                 var id = $(this).data('id');
                 var nom = $(this).data('nom');

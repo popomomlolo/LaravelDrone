@@ -15,7 +15,8 @@ Route::get('/', fn() => view('acceuil'));
 Route::get('/historique', [historiqueControlleur::class, 'index'])->name('historique.index');
 
 // ── Statistiques ──
-Route::get('/statistique', [statistiqueControlleur::class, 'index'])->name('statistique.index');
+Route::get('/statistique',         [statistiqueControlleur::class, 'index'])->name('statistique.index');
+Route::get('/statistique/filtrer', [statistiqueControlleur::class, 'filtrer'])->name('statistique.filtrer');
 
 Route::get('/signin', [AuthController::class, 'signinForm'])->name('login');
 

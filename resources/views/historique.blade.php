@@ -1,4 +1,4 @@
-@extends('layouts.base')
+@extends('layouts.layout')
 
 @section('title', 'Historique')
 
@@ -72,7 +72,7 @@
     $(document).ready(function () {
         $('#historiqueTable').DataTable({
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
             },
             pageLength: 10,
             lengthMenu: [5, 10, 25, 50],

@@ -215,22 +215,35 @@
 
     @stack('styles')
 </head>
-<body>
 
+<body>
+    <div class="flex-center position-ref full-height">
+      @if (Route::has('login'))
+      <div class="top-right links">
+        @auth
+        <a href="{{ url('/home') }}">Home</a>
+        @else
+        <a href="{{ route('login') }}">Login</a>
+
+        @endauth
+      </div>
+      @endif
     <!-- Sidebar -->
     <aside class="sidebar">
-        <a class="logo" href="/"><span>Drone</span>Academy</a>
+        <a class="logo" href="/"><span>LARAVEL DRONE</span></a>
         <nav class="d-flex flex-column gap-1">
             <a href="{{ route('historique.index') }}"
                class="nav-link {{ request()->routeIs('historique.*') ? 'active' : '' }}">
                 📋 Historique
-            </a>
+            </a><br>
+            <a href="{{ route('statistique.index') }}"
+               class="nav-link {{ request()->routeIs('statistique.*') ? 'active' : '' }}">
+                📊 Statistique
+            </a><br>
             <a href="{{ route('apprentis.index') }}"
-               class="nav-link {{ request()->routeIs('apprentis.*') ? 'active' : '' }}">
-                👤 Apprentis
-            </a>
-            <a href="#" class="nav-link">🎯 Objectifs</a>
-            <a href="#" class="nav-link">🏫 Classes</a>
+                class="nav-link {{ request()->routeIs('apprentis.*') ? 'active' : '' }}">
+                  👨‍🎓 Apprentis
+              </a><br>
         </nav>
     </aside>
 

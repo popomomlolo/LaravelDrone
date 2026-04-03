@@ -1,195 +1,274 @@
-@extends('layouts.base')
+@extends('layouts.layout')
 
 @section('title', 'Statistiques')
 
 @section('content')
 
-{{-- jQuery + DataTables --}}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <link
+        rel="stylesheet"
+        href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
+    >
 
-<style>
+    <div class="page-wrap">
 
-</style>
+        <div class="page-title">Statistiques</div>
+        <p class="page-sub">Filtrez par classe et/ou par objectif pour afficher les apprentis</p>
 
-<div class="page-wrap">
+        {{-- ── Combobox ── --}}
+        <div class="filtres">
+            <div class="filtre-group">
+                <label for="selectClasse">Classe</label>
+                <select id="selectClasse">
+                    <option value="">-- Toutes les classes --</option>
+                    @foreach ($classes as $classe)
+                        <option value="{{ $classe->id_classes }}">{{ $classe->libelle_classes }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-    <div class="page-title">Statistiques</div>
-    <p class="page-sub">Sélectionnez une classe pour afficher ses apprentis</p>
+            <div class="filtre-group">
+                <label for="selectObjectif">Objectif</label>
+                <select id="selectObjectif">
+                    <option value="">-- Tous les objectifs --</option>
+                    @foreach ($objectifs as $objectif)
+                        <option value="{{ $objectif->id_objectifs }}">{{ $objectif->libelle_objectifs }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-    {{-- ── Combobox ── --}}
-    <div class="select-wrap">
-        <label for="classeSelect">Classe</label>
-        <select id="classeSelect" onchange="filtrerClasse(this.value)">
-            <option value="">-- Choisir une classe --</option>
-            @foreach ($classes as $classe)
-                <option value="{{ $classe->id_classes }}"
-                    {{ $classeSelectee == $classe->id_classes ? 'selected' : '' }}>
-                    {{ $classe->libelle_classes }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+            <div
+                class="spinner"
+                id="spinner"
+            ></div>
+        </div>
 
-    {{-- ── Tableau (visible uniquement si une classe est sélectionnée) ── --}}
-    @if ($classeSelectee && $apprentis->isNotEmpty())
+        {{-- ── Zone tableau injectée par AJAX ── --}}
+        <div id="tableZone">
+            <p class="msg-info">Sélectionnez au moins un filtre pour afficher les résultats.</p>
+        </div>
 
-        <table id="apprentisTable" class="display" style="width:100%">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Classe</th>
-                    <th>Sessions</th>
-                    <th>Taux de réussite</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($apprentis as $apprenti)
-                    @php
-                        // Calcul global sur toutes ses sessions
-                        $totalObjectifs  = 0;
-                        $totalReussis    = 0;
-                        $objectifsDetail = []; // pour la modale
+        {{-- ── Zone graphique Highcharts (cachée au départ) ── --}}
 
-                        foreach ($apprenti->sessions as $session) {
-                            foreach ($session->objectifs as $obj) {
-                                $key = $obj->id_objectifs . '_' . $session->id_sessions;
-                                $objectifsDetail[] = [
-                                    'libelle' => $obj->libelle_objectifs,
-                                    'reussi'  => (bool) $obj->pivot->reussi,
-                                ];
-                                $totalObjectifs++;
-                                if ($obj->pivot->reussi) $totalReussis++;
-                            }
+        <div
+            id="chartZone"
+            style="display:none;"
+        >
+            <div id="chartZone">
+                <div id="chartContainer"></div>
+                <p class="chart-description">
+                    Nombre d'apprentis ayant réussi <span style="color:#22c55e">●</span> ou échoué <span
+                        style="color:#ef4444"
+                    >●</span> chaque objectif
+                </p>
+            </div>
+        </div>
+
+
+
+        {{-- ── Modale ── --}}
+        <div
+            class="modal-overlay"
+            id="modalOverlay"
+        >
+            <div class="modal-box">
+                <button
+                    class="modal-close"
+                    onclick="fermerModale()"
+                >✕</button>
+                <div class="modal-identite">
+                    <div
+                        class="modal-nom"
+                        id="modalNom"
+                    ></div>
+                    <div
+                        class="modal-classe"
+                        id="modalClasse"
+                    ></div>
+                </div>
+                <div id="modalSessions"></div>
+            </div>
+        </div>
+
+        {{-- ── Scripts (tous en bas) ── --}}
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="{{ asset('js/libs/highcharts.js') }}"></script>
+        <script src="{{ asset('js/libs/highcharts-more.js') }}"></script>
+        <script src="{{ asset('js/libs/exporting.js') }}"></script>
+        <script src="{{ asset('js/libs/accessibility.js') }}"></script>
+        <script src="{{ asset('js/libs/Statistiquechart.js') }}"></script>
+
+        <script>
+            let tableInstance = null;
+            let tousLesApprentis = [];
+            const urlFiltrer = '{{ route('statistique.filtrer') }}';
+
+            // ── Écoute les changements des combobox ──
+            $('#selectClasse, #selectObjectif').on('change', function() {
+                const idClasse = $('#selectClasse').val();
+                const idObjectif = $('#selectObjectif').val();
+
+                if (!idClasse && !idObjectif) {
+                    $('#tableZone').html(
+                        '<p class="msg-info">Sélectionnez au moins un filtre pour afficher les résultats.</p>');
+                    $('#chartZone').hide();
+                    if (tableInstance) {
+                        tableInstance.destroy();
+                        tableInstance = null;
+                    }
+                    return;
+                }
+
+                chargerDonnees(idClasse, idObjectif);
+            });
+
+            // ── Appel AJAX ──
+            function chargerDonnees(idClasse, idObjectif) {
+                $('#spinner').show();
+                $('#chartZone').hide();
+
+                $.ajax({
+                    url: urlFiltrer,
+                    method: 'GET',
+                    data: {
+                        id_classes: idClasse,
+                        id_objectifs: idObjectif
+                    },
+                    success: function(data) {
+                        tousLesApprentis = data;
+                        afficherTableau(data);
+
+                        // Lance le graphique après le tableau
+                        if (data.length > 0) {
+                            $('#chartZone').show();
+                            // Petit délai pour laisser le DOM se mettre à jour
+                            setTimeout(function() {
+                                initChart(data);
+                            }, 100);
                         }
+                    },
+                    error: function() {
+                        $('#tableZone').html(
+                            '<p class="msg-info" style="color:red;">Erreur lors du chargement des données.</p>');
+                    },
+                    complete: function() {
+                        $('#spinner').hide();
+                    }
+                });
+            }
 
-                        $taux = $totalObjectifs > 0
-                            ? round(($totalReussis / $totalObjectifs) * 100)
-                            : null;
-                    @endphp
+            // ── Construit et affiche le DataTable ──
+            function afficherTableau(data) {
+                $(document).ready(function() {
+                    $('#tab').DataTable({
+                        language: {
+                            url: "https://cdn.datatables.net/plug-ins/2.3.7/i18n/fr-FR.json"
+                        }
+                    });
+                });
+                if (tableInstance) {
+                    tableInstance.destroy();
+                }
 
-                    <tr style="cursor:pointer"
-                        onclick="ouvrirModale(
-                            '{{ addslashes($apprenti->nom) }}',
-                            '{{ addslashes($apprenti->prenom) }}',
-                            '{{ addslashes($apprenti->classes->libelle_classes ?? '—') }}',
-                            {{ json_encode($objectifsDetail) }}
-                        )">
-                        <td>{{ $apprenti->nom }}</td>
-                        <td>{{ $apprenti->prenom }}</td>
-                        <td>{{ $apprenti->classes->libelle_classes ?? '—' }}</td>
-                        <td>{{ $apprenti->sessions->count() }}</td>
-                        <td>
-                            @if ($taux === null)
-                                <span style="color:#636b6f;">—</span>
-                            @elseif ($taux >= 75)
-                                <span style="color:green; font-weight:600;">{{ $taux }}%</span>
-                            @elseif ($taux >= 50)
-                                <span style="color:orange; font-weight:600;">{{ $taux }}%</span>
-                            @else
-                                <span style="color:red; font-weight:600;">{{ $taux }}%</span>
-                            @endif
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+                if (data.length === 0) {
+                    $('#tableZone').html('<p class="msg-info">Aucun apprenti trouvé pour ces filtres.</p>');
+                    return;
+                }
 
-    @elseif ($classeSelectee && $apprentis->isEmpty())
-        <p class="empty-msg">Aucun apprenti dans cette classe.</p>
-    @endif
+                let rows = '';
+                data.forEach(function(a, index) {
+                    rows += '<tr data-index="' + index + '">' +
+                        '<td>' + a.nom + '</td>' +
+                        '<td>' + a.prenom + '</td>' +
+                        '<td>' + a.classe + '</td>' +
+                        '<td>' + a.nb_sessions + '</td>' +
+                        '</tr>';
+                });
 
-</div>
+                $('#tableZone').html(
+                    '<table id="apprentisTable" class="display" style="width:100%">' +
+                    '<thead><tr><th>Nom</th><th>Prénom</th><th>Classe</th><th>Nb sessions</th></tr></thead>' +
+                    '<tbody>' + rows + '</tbody>' +
+                    '</table>'
+                );
 
-{{-- ── Modale ── --}}
-<div class="modal-overlay" id="modalOverlay" onclick="fermerModale(event)">
-    <div class="modal-box">
-        <button class="modal-close" onclick="fermerModaleBtn()">✕</button>
+                tableInstance = $('#apprentisTable').DataTable({
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+                    },
+                    pageLength: 10,
+                    lengthMenu: [5, 10, 25, 50],
+                    order: [
+                        [0, 'asc']
+                    ]
+                });
 
-        <div class="modal-name" id="modalNom"></div>
-        <div class="modal-classe" id="modalClasse"></div>
+                $('#apprentisTable tbody').on('click', 'tr', function() {
+                    ouvrirModale(tousLesApprentis[$(this).data('index')]);
+                });
+            }
 
-        <div class="modal-section-title">✓ Objectifs réussis</div>
-        <div id="modalReussis"></div>
+            // ── Modale ──
+            function ouvrirModale(apprenti) {
+                document.getElementById('modalNom').textContent = apprenti.nom + ' ' + apprenti.prenom;
+                document.getElementById('modalClasse').textContent = '📚 ' + apprenti.classe;
 
-        <div class="modal-section-title">✗ Objectifs échoués</div>
-        <div id="modalEchoues"></div>
-    </div>
-</div>
+                let html = '';
 
-<script>
-    // ── Redirection sur changement de classe ──
-    function filtrerClasse(idClasse) {
-        window.location.href = '{{ route('statistique.index') }}?id_classes=' + idClasse;
-    }
+                if (apprenti.sessions.length === 0) {
+                    html = '<p class="empty-obj">Aucune session réalisée.</p>';
+                } else {
+                    apprenti.sessions.forEach(function(session, i) {
+                        const reussis = session.objectifs.filter(function(o) {
+                            return o.reussi;
+                        });
+                        const echoues = session.objectifs.filter(function(o) {
+                            return !o.reussi;
+                        });
 
-    // ── Ouvrir la modale ──
-    function ouvrirModale(nom, prenom, classe, objectifs) {
-        document.getElementById('modalNom').textContent    = nom + ' ' + prenom;
-        document.getElementById('modalClasse').textContent = classe;
+                        const htmlReussis = reussis.length === 0 ?
+                            '<p class="empty-obj">Aucun objectif réussi</p>' :
+                            reussis.map(function(o) {
+                                return '<div class="objectif-item"><span class="dot reussi"></span><span>' + o
+                                    .libelle + '</span><span class="quantite">' + o.quantite_realisee + ' / ' + o
+                                    .quantite_a_atteindre + '</span></div>';
+                            }).join('');
 
-        const reussisEl  = document.getElementById('modalReussis');
-        const echouesEl  = document.getElementById('modalEchoues');
+                        const htmlEchoues = echoues.length === 0 ?
+                            '<p class="empty-obj">Aucun objectif échoué</p>' :
+                            echoues.map(function(o) {
+                                return '<div class="objectif-item"><span class="dot echoue"></span><span>' + o
+                                    .libelle + '</span><span class="quantite">' + o.quantite_realisee + ' / ' + o
+                                    .quantite_a_atteindre + '</span></div>';
+                            }).join('');
 
-        reussisEl.innerHTML = '';
-        echouesEl.innerHTML = '';
+                        html += '<div class="session-block">' +
+                            '<div class="session-header">' +
+                            '<span class="session-titre">Session ' + (i + 1) + ' — ' + session.date + '</span>' +
+                            '<span class="session-meta">' + session.type_drone + ' · ' + session.type_environnement +
+                            ' · ' + session.conditions_meteo + '</span>' +
+                            '</div>' +
+                            '<div class="session-body">' +
+                            '<div class="section-label">✓ Objectifs réussis</div>' + htmlReussis +
+                            '<div class="section-label">✗ Objectifs échoués</div>' + htmlEchoues +
+                            '</div>' +
+                            '</div>';
+                    });
+                }
 
-        const reussis = objectifs.filter(o => o.reussi);
-        const echoues = objectifs.filter(o => !o.reussi);
+                document.getElementById('modalSessions').innerHTML = html;
+                document.getElementById('modalOverlay').classList.add('active');
+            }
 
-        if (reussis.length === 0) {
-            reussisEl.innerHTML = '<p class="empty-msg">Aucun objectif réussi</p>';
-        } else {
-            reussis.forEach(o => {
-                reussisEl.innerHTML += `
-                    <div class="objectif-item">
-                        <span class="dot reussi"></span>
-                        <span>${o.libelle}</span>
-                    </div>`;
+            function fermerModale() {
+                document.getElementById('modalOverlay').classList.remove('active');
+            }
+
+            document.getElementById('modalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) fermerModale();
             });
-        }
+        </script>
 
-        if (echoues.length === 0) {
-            echouesEl.innerHTML = '<p class="empty-msg">Aucun objectif échoué</p>';
-        } else {
-            echoues.forEach(o => {
-                echouesEl.innerHTML += `
-                    <div class="objectif-item">
-                        <span class="dot echoue"></span>
-                        <span>${o.libelle}</span>
-                    </div>`;
-            });
-        }
 
-        document.getElementById('modalOverlay').classList.add('active');
-    }
 
-    // ── Fermer la modale ──
-    function fermerModaleBtn() {
-        document.getElementById('modalOverlay').classList.remove('active');
-    }
-
-    function fermerModale(event) {
-        if (event.target === document.getElementById('modalOverlay')) {
-            document.getElementById('modalOverlay').classList.remove('active');
-        }
-    }
-
-    // ── DataTables ──
-    $(document).ready(function () {
-        if ($('#apprentisTable').length) {
-            $('#apprentisTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-                },
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 50],
-                order: [[0, 'asc']]
-            });
-        }
-    });
-</script>
-
-@endsection
+    @endsection
