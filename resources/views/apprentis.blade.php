@@ -131,7 +131,8 @@
         style="display: none; margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;"
     >
         <h3>Importer plusieurs apprentis (CSV)</h3>
-        <p style="font-size: 0.85rem; color: #666;">Format du fichier : <code>nom,prenom,libelle_classes</code> (avec entête — la classe sera créée si elle n'existe pas)</p>
+        <p style="font-size: 0.85rem; color: #666;">Format du fichier : <code>nom,prenom,libelle_classes</code> (avec entête
+            — la classe sera créée si elle n'existe pas)</p>
         <form
             action="/apprentis/import-csv"
             method="POST"
