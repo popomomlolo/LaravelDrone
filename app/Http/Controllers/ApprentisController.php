@@ -17,9 +17,14 @@ class ApprentisController extends Controller
 
     public function getApprentis()
     {
-        $apprentis = Apprenti::select('id_apprentis', 'nom', 'prenom')
-            ->orderBy('nom')
-            ->get();
+        $apprentis = Apprenti::with('classe')->orderBy('nom')->get()
+            ->map(fn($a) => [
+                'id_apprentis'    => $a->id_apprentis,
+                'nom'             => $a->nom,
+                'prenom'          => $a->prenom,
+                'id_classes'      => $a->id_classes,
+                'libelle_classes' => $a->classe->libelle_classes ?? $a->id_classes,
+            ]);
         return response()->json($apprentis);
     }
 
@@ -33,11 +38,12 @@ class ApprentisController extends Controller
     public function supprimer(Request $request)
     {
         $apprenti = Apprenti::find($request->apprenti_id);
-        if ($apprenti) {
-            DB::table('sessions_drone')->where('id_apprentis', $request->apprenti_id)->delete();
-            $apprenti->delete();
+        if (!$apprenti) {
+            return response()->json(['success' => false, 'message' => 'Apprenti introuvable'], 404);
         }
-        return redirect('/apprentis')->with('success', 'Apprenti supprimé avec succès');
+        DB::table('sessions_drone')->where('id_apprentis', $request->apprenti_id)->delete();
+        $apprenti->delete();
+        return response()->json(['success' => true]);
     }
 
     public function modifierForm(Request $request)
@@ -51,13 +57,24 @@ class ApprentisController extends Controller
     public function update(Request $request)
     {
         $apprenti = Apprenti::find($request->apprenti_id);
-        if ($apprenti) {
-            $apprenti->nom = $request->nom;
-            $apprenti->prenom = $request->prenom;
-            $apprenti->id_classes = $request->id_classes;
-            $apprenti->save();
+        if (!$apprenti) {
+            return response()->json(['success' => false, 'message' => 'Apprenti introuvable'], 404);
         }
-        return redirect('/apprentis')->with('success', 'Apprenti modifié avec succès');
+        $apprenti->nom       = $request->nom;
+        $apprenti->prenom    = $request->prenom;
+        $apprenti->id_classes = $request->id_classes;
+        $apprenti->save();
+
+        $libelle = Classes::find($request->id_classes)->libelle_classes ?? $request->id_classes;
+
+        return response()->json([
+            'success'         => true,
+            'id_apprentis'    => $apprenti->id_apprentis,
+            'nom'             => $apprenti->nom,
+            'prenom'          => $apprenti->prenom,
+            'id_classes'      => $apprenti->id_classes,
+            'libelle_classes' => $libelle,
+        ]);
     }
 
     public function ajouter(Request $request)

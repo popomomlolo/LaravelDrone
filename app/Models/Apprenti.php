@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Classes;
 
 class Apprenti extends Model
 {
@@ -12,4 +13,9 @@ class Apprenti extends Model
     protected $primaryKey = 'id_apprentis';
     public $incrementing = true;
     protected $keyType = 'int';
+
+    public function classe()
+    {
+        return $this->belongsTo(Classes::class, 'id_classes', 'id_classes');
+    }
 }

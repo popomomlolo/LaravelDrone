@@ -6,81 +6,27 @@
     <h1>Liste des apprentis</h1>
 
     @if (session('success'))
-        <div style="color: green;">{{ session('success') }}</div>
+        <div style="color:green;margin-bottom:1rem;">{{ session('success') }}</div>
     @endif
 
-    {{-- Formulaire de modification --}}
-    @if (isset($apprenti))
-        <div
-            id="formModifier"
-            style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;"
-        >
-            <h3>Modifier l'apprenti</h3>
-            <form
-                action="/apprentis/update"
-                method="POST"
-            >
-                @csrf
-                <input
-                    type="hidden"
-                    name="apprenti_id"
-                    value="{{ $apprenti->id_apprentis }}"
-                >
-                <div style="margin-bottom: 0.5rem;">
-                    <label>Nom :</label>
-                    <input
-                        type="text"
-                        name="nom"
-                        value="{{ $apprenti->nom }}"
-                        required
-                    >
-                </div>
-                <div style="margin-bottom: 0.5rem;">
-                    <label>Prénom :</label>
-                    <input
-                        type="text"
-                        name="prenom"
-                        value="{{ $apprenti->prenom }}"
-                        required
-                    >
-                </div>
-                <div style="margin-bottom: 0.5rem;">
-                    <label>Classe :</label>
-                    <select
-                        name="id_classes"
-                        required
-                    >
-                        @foreach ($classes as $id => $libelle)
-                            <option
-                                value="{{ $id }}"
-                                {{ $apprenti->id_classes == $id ? 'selected' : '' }}
-                            >{{ $libelle }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <button type="submit">Enregistrer</button>
-            </form>
-        </div>
-    @endif
-
-    {{-- Boutons pour afficher/masquer les formulaires --}}
-    <div style="margin-bottom: 1.5rem;">
+    {{-- Boutons formulaires --}}
+    <div style="margin-bottom:1.5rem;">
         <button
             id="btnAjouter"
             type="button"
-            style="background: #28a745; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;"
+            style="background:#28a745;color:#fff;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;margin-right:0.5rem;"
         >+ Ajouter un apprenti</button>
         <button
             id="btnImport"
             type="button"
-            style="background: #007bff; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;"
+            style="background:#007bff;color:#fff;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;"
         >Importer CSV</button>
     </div>
 
     {{-- Formulaire d'ajout --}}
     <div
         id="formAjouter"
-        style="display: none; margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;"
+        style="display:none;margin-bottom:1.5rem;padding:1rem;border:1px solid #ddd;border-radius:8px;max-width:400px;"
     >
         <h3>Ajouter un apprenti</h3>
         <form
@@ -88,30 +34,26 @@
             method="POST"
         >
             @csrf
-            <div style="margin-bottom: 0.5rem;">
-                <label>Nom :</label>
-                <input
+            <div style="margin-bottom:0.5rem;"><label>Nom :</label><input
                     type="text"
                     name="nom"
                     placeholder="Nom"
                     required
-                >
-            </div>
-            <div style="margin-bottom: 0.5rem;">
-                <label>Prénom :</label>
-                <input
+                    style="width:100%;padding:0.3rem;"
+                ></div>
+            <div style="margin-bottom:0.5rem;"><label>Prénom :</label><input
                     type="text"
                     name="prenom"
                     placeholder="Prénom"
                     required
-                >
-            </div>
-
-            <div style="margin-bottom: 0.5rem;">
+                    style="width:100%;padding:0.3rem;"
+                ></div>
+            <div style="margin-bottom:0.5rem;">
                 <label>Classe :</label>
                 <select
                     name="id_classes"
                     required
+                    style="width:100%;padding:0.3rem;"
                 >
                     @foreach ($classes as $id => $libelle)
                         <option value="{{ $id }}">{{ $libelle }}</option>
@@ -120,7 +62,7 @@
             </div>
             <button
                 type="submit"
-                style="background: #28a745; color: #fff; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;"
+                style="background:#28a745;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;"
             >Ajouter</button>
         </form>
     </div>
@@ -128,11 +70,10 @@
     {{-- Import CSV --}}
     <div
         id="formImport"
-        style="display: none; margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; max-width: 400px;"
+        style="display:none;margin-bottom:2rem;padding:1rem;border:1px solid #ddd;border-radius:8px;max-width:400px;"
     >
         <h3>Importer plusieurs apprentis (CSV)</h3>
-        <p style="font-size: 0.85rem; color: #666;">Format du fichier : <code>nom,prenom,libelle_classes</code> (avec entête
-            — la classe sera créée si elle n'existe pas)</p>
+        <p style="font-size:0.85rem;color:#666;">Format : <code>nom,prenom,libelle_classes</code> (avec entête)</p>
         <form
             action="/apprentis/import-csv"
             method="POST"
@@ -147,12 +88,12 @@
             >
             <button
                 type="submit"
-                style="background: #007bff; color: #fff; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; margin-top: 0.5rem;"
+                style="background:#007bff;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;margin-top:0.5rem;"
             >Importer</button>
         </form>
     </div>
 
-    {{-- Tableau des apprentis --}}
+    {{-- Tableau --}}
     <table
         id="apprentisTable"
         class="display"
@@ -160,78 +101,112 @@
     >
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Nom</th>
                 <th>Prénom</th>
                 <th>Classe</th>
+                <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
-            @foreach ($apprentis as $a)
-                <tr
-                    data-id="{{ $a->id_apprentis }}"
-                    data-nom="{{ $a->nom }}"
-                    data-prenom="{{ $a->prenom }}"
-                    data-id_classes="{{ $a->id_classes }}"
-                    data-classe="{{ $classes[$a->id_classes] ?? $a->id_classes }}"
-                >
-                    <td>{{ $a->id_apprentis }}</td>
-                    <td>{{ $a->nom }}</td>
-                    <td>{{ $a->prenom }}</td>
-                    <td>{{ $classes[$a->id_classes] ?? $a->id_classes }}</td>
-                </tr>
-            @endforeach
-        </tbody>
+        <tbody></tbody>
     </table>
 
-    <!-- Modal -->
+    {{-- Modale Modifier --}}
     <div
-        class="modal-overlay"
-        id="apprentiModal"
-        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:1000; align-items:center; justify-content:center;"
+        id="modalModifier"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;"
     >
         <div
-            style="box-shadow: 0 20px 60px rgba(255, 0, 0, 1); background:#000000; padding:2rem; border-radius:8px; min-width:300px; max-width:400px; margin:auto; position:relative;">
-            <span
-                id="closeModal"
-                style="position:absolute; top:8px; right:12px; cursor:pointer; font-size:1.5rem;"
-            >&times;</span>
-            <h3 id="modalNom"></h3>
-            <p><strong>Prénom :</strong> <span id="modalPrenom"></span></p>
-            <p><strong>Classe :</strong> <span id="modalClasse"></span></p>
+            style="background:#1a1a2e;color:#e2e8f0;padding:2rem;border-radius:12px;width:420px;max-width:90vw;position:relative;border:1px solid #2a2f3d;">
+            <button
+                id="closeModifier"
+                style="position:absolute;top:0.75rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#aaa;"
+            >&times;</button>
+            <h3 style="margin-bottom:1.5rem;">✏️ Modifier l'apprenti</h3>
             <form
-                id="modalSupprimerForm"
-                action="/apprentis/supprimer"
+                id="formModifierModal"
+                action="/apprentis/update"
                 method="POST"
-                style="margin-bottom:1rem;"
             >
                 @csrf
                 <input
                     type="hidden"
                     name="apprenti_id"
-                    id="modalSupprimerId"
+                    id="modifierId"
                 >
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block;margin-bottom:0.25rem;">Nom :</label>
+                    <input
+                        type="text"
+                        name="nom"
+                        id="modifierNom"
+                        required
+                        style="width:100%;padding:0.5rem;background:#0d0f14;border:1px solid #2a2f3d;border-radius:6px;color:#e2e8f0;"
+                    >
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block;margin-bottom:0.25rem;">Prénom :</label>
+                    <input
+                        type="text"
+                        name="prenom"
+                        id="modifierPrenom"
+                        required
+                        style="width:100%;padding:0.5rem;background:#0d0f14;border:1px solid #2a2f3d;border-radius:6px;color:#e2e8f0;"
+                    >
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block;margin-bottom:0.25rem;">Classe :</label>
+                    <select
+                        name="id_classes"
+                        id="modifierClasse"
+                        required
+                        style="width:100%;padding:0.5rem;background:#0d0f14;border:1px solid #2a2f3d;border-radius:6px;color:#e2e8f0;"
+                    >
+                        @foreach ($classes as $id => $libelle)
+                            <option value="{{ $id }}">{{ $libelle }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="display:flex;gap:0.75rem;">
+                    <button
+                        type="submit"
+                        style="background:#007bff;color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:600;"
+                    >Enregistrer</button>
+                    <button
+                        type="button"
+                        id="annulerModifier"
+                        style="background:#444;color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:6px;cursor:pointer;"
+                    >Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Modale Confirmation Suppression --}}
+    <div
+        id="modalSupprimer"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;"
+    >
+        <div
+            style="background:#1a1a2e;color:#e2e8f0;padding:2rem;border-radius:12px;width:380px;max-width:90vw;position:relative;border:1px solid #2a2f3d;text-align:center;">
+            <div style="font-size:3rem;margin-bottom:0.5rem;">⚠️</div>
+            <h3 style="margin-bottom:0.5rem;">Confirmer la suppression</h3>
+            <p style="color:#aaa;margin-bottom:1.5rem;">Voulez-vous vraiment supprimer <strong
+                    id="supprimerNomComplet"></strong> ?<br>Cette action est irréversible.</p>
+            <input
+                type="hidden"
+                id="supprimerId"
+            >
+            <div style="display:flex;gap:0.75rem;justify-content:center;">
                 <button
-                    type="submit"
-                    style="background:#dc3545; color:#fff; border:none; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;"
+                    id="btnConfirmerSupprimer"
+                    style="background:#dc3545;color:#fff;border:none;padding:0.5rem 1.5rem;border-radius:6px;cursor:pointer;font-weight:600;"
                 >Supprimer</button>
-            </form>
-            <form
-                id="modalModifierForm"
-                action="/apprentis/modifier"
-                method="POST"
-            >
-                @csrf
-                <input
-                    type="hidden"
-                    name="apprenti_id"
-                    id="modalModifierId"
-                >
                 <button
-                    type="submit"
-                    style="background:#007bff; color:#fff; border:none; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;"
-                >Modifier</button>
-            </form>
+                    type="button"
+                    id="annulerSupprimer"
+                    style="background:#444;color:#fff;border:none;padding:0.5rem 1.5rem;border-radius:6px;cursor:pointer;"
+                >Annuler</button>
+            </div>
         </div>
     </div>
 
@@ -241,68 +216,129 @@
         href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
     >
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
     <script>
+        var csrfToken = '{{ csrf_token() }}';
+
         $(document).ready(function() {
-            $('#apprentisTable').DataTable({
+            var table = $('#apprentisTable').DataTable({
+                ajax: {
+                    url: '/api/apprentis',
+                    dataSrc: ''
+                },
+                columns: [{
+                        data: 'nom'
+                    },
+                    {
+                        data: 'prenom'
+                    },
+                    {
+                        data: 'libelle_classes'
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        render: function(data) {
+                            return '<button class="btn-modifier" ' +
+                                'data-id="' + data.id_apprentis + '" ' +
+                                'data-nom="' + data.nom + '" ' +
+                                'data-prenom="' + data.prenom + '" ' +
+                                'data-id_classes="' + data.id_classes + '" ' +
+                                'style="background:#007bff;color:#fff;border:none;padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;margin-right:0.4rem;">✏️ Modifier</button>' +
+                                '<button class="btn-supprimer" ' +
+                                'data-id="' + data.id_apprentis + '" ' +
+                                'data-nom="' + data.nom + '" ' +
+                                'data-prenom="' + data.prenom + '" ' +
+                                'style="background:#dc3545;color:#fff;border:none;padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;">🗑️ Supprimer</button>';
+                        }
+                    }
+                ],
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-                }
-            });
-            $('#apprentisTable tbody').on('click', 'tr', function() {
-                var id = $(this).data('id');
-                var nom = $(this).data('nom');
-                var prenom = $(this).data('prenom');
-                var classe = $(this).data('classe');
-                $('#modalNom').text(nom);
-                $('#modalPrenom').text(prenom);
-                $('#modalClasse').text(classe);
-                $('#modalSupprimerId').val(id);
-                $('#modalModifierId').val(id);
-                $('#apprentiModal').css('display', 'flex');
-            });
-            $('#closeModal').on('click', function() {
-                $('#apprentiModal').hide();
-            });
-            $('#apprentiModal').on('click', function(e) {
-                if (e.target === this) {
-                    $(this).hide();
-                }
-            });
-        });
-    </script>
-
-    <script>
-        // Toggle pour afficher/masquer les formulaires
-        document.addEventListener('DOMContentLoaded', function() {
-            var btnAjouter = document.getElementById('btnAjouter');
-            var btnImport = document.getElementById('btnImport');
-            var formAjouter = document.getElementById('formAjouter');
-            var formImport = document.getElementById('formImport');
-            var formModifier = document.getElementById('formModifier');
-            btnAjouter.addEventListener('click', function() {
-                if (formAjouter.style.display === 'none') {
-                    formAjouter.style.display = 'block';
-                    formImport.style.display = 'none';
-                    formModifier.style.display = 'none';
-                    btnAjouter.style.background = '#218838';
-                    btnImport.style.background = '#007bff';
-                } else {
-                    formAjouter.style.display = 'none';
-                    btnAjouter.style.background = '#28a745';
-                }
+                },
+                pageLength: 10
             });
 
-            btnImport.addEventListener('click', function() {
-                if (formImport.style.display === 'none') {
-                    formImport.style.display = 'block';
-                    formAjouter.style.display = 'none';
-                    formModifier.style.display = 'none';
-                    btnImport.style.background = '#0056b3';
-                    btnAjouter.style.background = '#28a745';
-                } else {
-                    formImport.style.display = 'none';
-                    btnImport.style.background = '#007bff';
-                }
+            // ── Modale Modifier ──
+            $('#apprentisTable tbody').on('click', '.btn-modifier', function() {
+                $('#modifierId').val($(this).data('id'));
+                $('#modifierNom').val($(this).data('nom'));
+                $('#modifierPrenom').val($(this).data('prenom'));
+                $('#modifierClasse').val($(this).data('id_classes'));
+                $('#modalModifier').css('display', 'flex');
+            });
+
+            $('#closeModifier, #annulerModifier').on('click', function() {
+                $('#modalModifier').hide();
+            });
+            $('#modalModifier').on('click', function(e) {
+                if (e.target === this) $(this).hide();
+            });
+
+            // Soumission AJAX modification
+            $('#formModifierModal').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/apprentis/update',
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(res) {
+                        if (res.success) {
+                            $('#modalModifier').hide();
+                            table.ajax.reload(null, false);
+                        }
+                    },
+                    error: function() {
+                        alert('Erreur lors de la modification.');
+                    }
+                });
+            });
+
+            // ── Modale Suppression ──
+            $('#apprentisTable tbody').on('click', '.btn-supprimer', function() {
+                $('#supprimerId').val($(this).data('id'));
+                $('#supprimerNomComplet').text($(this).data('nom') + ' ' + $(this).data('prenom'));
+                $('#modalSupprimer').css('display', 'flex');
+            });
+
+            $('#annulerSupprimer').on('click', function() {
+                $('#modalSupprimer').hide();
+            });
+            $('#modalSupprimer').on('click', function(e) {
+                if (e.target === this) $(this).hide();
+            });
+
+            // Confirmation suppression AJAX
+            $('#btnConfirmerSupprimer').on('click', function() {
+                var id = $('#supprimerId').val();
+                $.ajax({
+                    url: '/apprentis/supprimer',
+                    method: 'POST',
+                    data: {
+                        _token: csrfToken,
+                        apprenti_id: id
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            $('#modalSupprimer').hide();
+                            table.ajax.reload(null, false);
+                        }
+                    },
+                    error: function() {
+                        alert('Erreur lors de la suppression.');
+                    }
+                });
+            });
+
+            // ── Toggle formulaires ──
+            $('#btnAjouter').on('click', function() {
+                $('#formAjouter').toggle();
+                $('#formImport').hide();
+            });
+            $('#btnImport').on('click', function() {
+                $('#formImport').toggle();
+                $('#formAjouter').hide();
             });
         });
     </script>
