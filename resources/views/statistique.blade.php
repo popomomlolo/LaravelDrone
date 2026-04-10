@@ -151,13 +151,13 @@
                 >
                     ⬇ Export CSV
                 </button>
-                <a
+                <!--<a
                     href="{{ route('statistique.pdf') }}"
                     class="btn-export btn-pdf"
                     target="_blank"
                 >
                     ⬇ Export PDF
-                </a>
+                </a>-->
             </div>
 
         </div>
