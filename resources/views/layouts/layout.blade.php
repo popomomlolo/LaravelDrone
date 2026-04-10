@@ -327,6 +327,43 @@
             font-size: 0.875rem;
             font-style: italic;
         }
+
+        .export-zone {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            color: rgb(0, 0, 0);
+        }
+
+
+    .export-zone span {
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #636b6f;
+    }
+
+    .btn-export {
+        padding: 0.45rem 1rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: opacity 0.2s;
+    }
+
+    .btn-export:hover               { opacity: 0.82; }
+    .btn-csv                        { background: #22543d; color: #fff; }
+    .btn-pdf                        { background: #c53030; color: #fff; }
+    .btn-export:disabled            { opacity: 0.35; cursor: not-allowed; }
+    .btn-export[disabled]           { opacity: 0.35; cursor: not-allowed; }
     </style>
 
     @stack('styles')

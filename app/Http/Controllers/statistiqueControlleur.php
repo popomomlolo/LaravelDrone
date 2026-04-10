@@ -11,15 +11,21 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class statistiqueControlleur extends Controller
 {
+    // ================================================================
+    // PAGE PRINCIPALE - Charge les 2 combo box (classes + objectifs)
+    // ================================================================
     public function index()
     {
         $classes   = Classes::orderBy('libelle_classes')->get();
         $objectifs = Objectifs::orderBy('libelle_objectifs')->get();
-        $apprentis = Apprentis::orderBy('nom')->get();
+        //$apprentis = Apprentis::orderBy('nom')->get();
 
-        return view('statistique', compact('classes', 'objectifs', 'apprentis'));
+        return view('statistique', compact('classes', 'objectifs', /*'apprentis'*/));
     }
 
+    // ================================================================
+    // AJAX — retourne les apprentis filtrés en JSON
+    // ================================================================
     public function filtrer()
     {
         $idClasse   = request('id_classes');
@@ -41,26 +47,23 @@ class statistiqueControlleur extends Controller
             });
         }
 
-        $apprentis = $query->orderBy('nom')->get();
+        $result = $query->orderBy('nom')->get()->map(function ($apprenti) {
 
-        $result = $apprentis->map(function ($apprenti) {
             $sessions = $apprenti->sessions->map(function ($session) {
-                $objectifs = $session->objectifs->map(function ($obj) {
-                    return [
-                        'libelle'              => $obj->libelle_objectifs,
-                        'reussi'               => (bool) $obj->pivot->reussi,
-                        'quantite_a_atteindre' => $obj->pivot->quantite_a_atteindre,
-                        'quantite_realisee'    => $obj->pivot->quantite_realisee,
-                    ];
-                });
-
                 return [
                     'id'                 => $session->id_sessions,
                     'date'               => \Carbon\Carbon::parse($session->date_heure)->format('d/m/Y H:i'),
                     'type_drone'         => $session->type_drone,
                     'type_environnement' => $session->type_environnement,
                     'conditions_meteo'   => $session->conditions_meteo,
-                    'objectifs'          => $objectifs,
+                    'objectifs'          => $session->objectifs->map(function ($obj) {
+                        return [
+                            'libelle'              => $obj->libelle_objectifs,
+                            'reussi'               => (bool) $obj->pivot->reussi,
+                            'quantite_a_atteindre' => $obj->pivot->quantite_a_atteindre,
+                            'quantite_realisee'    => $obj->pivot->quantite_realisee,
+                        ];
+                    }),
                 ];
             });
 
@@ -77,33 +80,50 @@ class statistiqueControlleur extends Controller
         return response()->json($result);
     }
 
-    /**
-     * Export CSV — filtré par apprentis et/ou classe
-     */
+    // ================================================================
+    // EXPORT CSV — passe les filtres à statistiqueExport
+    //
+    // Cas 1 : aucun filtre     → toutes les classes
+    // Cas 2 : classe seule     → classe filtrée
+    // Cas 3 : objectif seul    → personnes ayant fait cet objectif
+    // Cas 4 : classe+objectif  → classe filtrée + objectif filtré
+    // ================================================================
     public function exportCsv()
     {
-        $idApprentis = request('id_apprentis');
-        $idClasses   = request('id_classes');
+        $idClasses   = request('id_classes')   ?: null;
+        $idObjectifs = request('id_objectifs') ?: null;
 
         return Excel::download(
-            new statistiqueExport($idApprentis, $idClasses),
+            new statistiqueExport($idClasses, $idObjectifs),
             'resultats_' . now()->format('Ymd_His') . '.csv',
             \Maatwebsite\Excel\Excel::CSV,
             ['Content-Type' => 'text/csv; charset=UTF-8']
         );
     }
 
-    /**
-     * Export PDF — une page par classe
-     */
+    // ================================================================
+    // EXPORT PDF — désactivé côté JS si aucun filtre (cas 1)
+    //
+    // Cas 2 : classe seule     → 1 page pour la classe
+    // Cas 3 : objectif seul    → toutes les classes, objectif mis en avant
+    // Cas 4 : classe+objectif  → 1 page pour la classe + objectif mis en avant
+    // ================================================================
     public function exportPdf()
     {
-        $html = statistiqueExport::genererHtmlPdf();
+        $idClasses   = request('id_classes')   ?: null;
+        $idObjectifs = request('id_objectifs') ?: null;
+
+        // Sécurité : bloque le PDF si aucun filtre (cas 1)
+        if (!$idClasses && !$idObjectifs) {
+            abort(400, 'Sélectionnez au moins un filtre pour exporter en PDF.');
+        }
+
+        $html = statistiqueExport::genererHtmlPdf($idClasses, $idObjectifs);
 
         $pdf = Pdf::loadHTML($html)
             ->setPaper('a4', 'landscape')
             ->setOptions(['defaultFont' => 'Arial', 'isHtml5ParserEnabled' => true]);
 
-        return $pdf->download('resultats_classes_' . now()->format('Ymd_His') . '.pdf');
+        return $pdf->download('resultats_' . now()->format('Ymd_His') . '.pdf');
     }
 }
