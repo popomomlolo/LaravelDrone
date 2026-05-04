@@ -8,122 +8,185 @@ use App\Models\Objectifs;
 use App\Exports\statistiqueExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
 
 class statistiqueControlleur extends Controller
 {
-    // ================================================================
-    // PAGE PRINCIPALE - Charge les 2 combo box (classes + objectifs)
-    // ================================================================
+    // ════════════════════════════════════════════════════════════════
+    // PAGE PRINCIPALE
+    // Charge les listes pour les combobox de la vue
+    // ════════════════════════════════════════════════════════════════
     public function index()
     {
         $classes   = Classes::orderBy('libelle_classes')->get();
         $objectifs = Objectifs::orderBy('libelle_objectifs')->get();
-        //$apprentis = Apprentis::orderBy('nom')->get();
+        $apprentis = Apprentis::orderBy('nom')->get();
 
-        return view('statistique', compact('classes', 'objectifs', /*'apprentis'*/));
+        return view('statistique', compact('classes', 'objectifs', 'apprentis'));
     }
 
-    // ================================================================
-    // AJAX — retourne les apprentis filtrés en JSON
-    // ================================================================
-    public function filtrer()
+    // ════════════════════════════════════════════════════════════════
+    // AJAX — FILTRER
+    // Aiguille vers la bonne fonction selon les filtres reçus
+    // Un seul return à la fin
+    // ════════════════════════════════════════════════════════════════
+    public function filtrer(): JsonResponse
     {
-        $idClasse   = request('id_classes');
-        $idObjectif = request('id_objectifs');
+        $idClasse   = request('id_classes')   ?: false;
+        $idObjectif = request('id_objectifs') ?: false;
+/*
+si class_
+        si objectif
+        alors
+            filtrerparclasseetobjectif
+        sinon
+            filtrerparclasse
+        finsi
+sinon
+        si objectif
+        alors
+            filtrerparobjectif
+        finsi
+finsi
 
-        if (!$idClasse && !$idObjectif) {
-            return response()->json([]);
-        }
 
-        $query = Apprentis::with(['classes', 'sessions.objectifs']);
 
-        if ($idClasse) {
-            $query->where('id_classes', $idClasse);
-        }
 
-        if ($idObjectif) {
-            $query->whereHas('sessions.objectifs', function ($q) use ($idObjectif) {
-                $q->where('objectifs.id_objectifs', $idObjectif);
-            });
-        }
+        */
+        // Sélection du cas selon les filtres présents
 
-        $result = $query->orderBy('nom')->get()->map(function ($apprenti) {
+ if ($idClasse) { 
+                if ($idObjectif) {
+                    $apprentis = $this->filtrerParClasseEtObjectif($idClasse, $idObjectif);
+                } else {
+                    $apprentis = $this->filtrerParClasse($idClasse);
+                }
+                
+            } else {
+                if ($idObjectif) {
+                    $apprentis = $this->filtrerParObjectif($idObjectif);
+                } else {
+                    $apprentis = collect(); // Cas 1 : aucun filtre
+                }
+            }
 
-            $sessions = $apprenti->sessions->map(function ($session) {
-                return [
-                    'id'                 => $session->id_sessions,
-                    'date'               => \Carbon\Carbon::parse($session->date_heure)->format('d/m/Y H:i'),
-                    'type_drone'         => $session->type_drone,
-                    'type_environnement' => $session->type_environnement,
-                    'conditions_meteo'   => $session->conditions_meteo,
-                    'objectifs'          => $session->objectifs->map(function ($obj) {
-                        return [
-                            'libelle'              => $obj->libelle_objectifs,
-                            'reussi'               => (bool) $obj->pivot->reussi,
-                            'quantite_a_atteindre' => $obj->pivot->quantite_a_atteindre,
-                            'quantite_realisee'    => $obj->pivot->quantite_realisee,
-                        ];
-                    }),
-                ];
-            });
+        
 
-            return [
-                'id'          => $apprenti->id_apprentis,
-                'nom'         => $apprenti->nom,
-                'prenom'      => $apprenti->prenom,
-                'classe'      => $apprenti->classes->libelle_classes ?? '—',
-                'nb_sessions' => $apprenti->sessions->count(),
-                'sessions'    => $sessions,
-            ];
-        });
+        $result = $apprentis->map(fn($a) => $this->formaterApprentis($a));
 
         return response()->json($result);
     }
 
-    // ================================================================
-    // EXPORT CSV — passe les filtres à statistiqueExport
-    //
-    // Cas 1 : aucun filtre     → toutes les classes
-    // Cas 2 : classe seule     → classe filtrée
-    // Cas 3 : objectif seul    → personnes ayant fait cet objectif
-    // Cas 4 : classe+objectif  → classe filtrée + objectif filtré
-    // ================================================================
+    // ════════════════════════════════════════════════════════════════
+    // EXPORT CSV
+    // 
+    // ════════════════════════════════════════════════════════════════
     public function exportCsv()
     {
         $idClasses   = request('id_classes')   ?: null;
         $idObjectifs = request('id_objectifs') ?: null;
 
-        return Excel::download(
-            new statistiqueExport($idClasses, $idObjectifs),
-            'resultats_' . now()->format('Ymd_His') . '.csv',
-            \Maatwebsite\Excel\Excel::CSV,
-            ['Content-Type' => 'text/csv; charset=UTF-8']
-        );
+        $export   = new statistiqueExport($idClasses, $idObjectifs);
+        $fileName = 'resultats_' . now()->format('Ymd_His') . '.csv';
+        $headers  = ['Content-Type' => 'text/csv; charset=UTF-8'];
+
+        return Excel::download($export, $fileName, \Maatwebsite\Excel\Excel::CSV, $headers);
     }
 
-    // ================================================================
-    // EXPORT PDF — désactivé côté JS si aucun filtre (cas 1)
-    //
-    // Cas 2 : classe seule     → 1 page pour la classe
-    // Cas 3 : objectif seul    → toutes les classes, objectif mis en avant
-    // Cas 4 : classe+objectif  → 1 page pour la classe + objectif mis en avant
-    // ================================================================
+    // ════════════════════════════════════════════════════════════════
+    // EXPORT PDF
+    // abort_if remplace le if + return pour le blocage sans filtre
+    // 
+    // ════════════════════════════════════════════════════════════════
     public function exportPdf()
     {
         $idClasses   = request('id_classes')   ?: null;
         $idObjectifs = request('id_objectifs') ?: null;
 
-        // Sécurité : bloque le PDF si aucun filtre (cas 1)
-        if (!$idClasses && !$idObjectifs) {
-            abort(400, 'Sélectionnez au moins un filtre pour exporter en PDF.');
-        }
+        abort_if(
+            !$idClasses && !$idObjectifs,
+            400,
+            'Sélectionnez au moins un filtre pour exporter en PDF.'
+        );
 
-        $html = statistiqueExport::genererHtmlPdf($idClasses, $idObjectifs);
+        $html     = statistiqueExport::genererHtmlPdf($idClasses, $idObjectifs);
+        $fileName = 'resultats_' . now()->format('Ymd_His') . '.pdf';
 
         $pdf = Pdf::loadHTML($html)
             ->setPaper('a4', 'landscape')
             ->setOptions(['defaultFont' => 'Arial', 'isHtml5ParserEnabled' => true]);
 
-        return $pdf->download('resultats_' . now()->format('Ymd_His') . '.pdf');
+        return $pdf->download($fileName);
+    }
+
+
+
+    /**
+     * Cas 2 — filtre par classe uniquement
+     */
+    private function filtrerParClasse( $idClasse)
+    {
+        return Apprentis::with(['classes', 'sessions.objectifs'])
+            ->where('id_classes', $idClasse)
+            ->orderBy('nom')
+            ->get();
+    }
+
+    /**
+     * Cas 3 — filtre par objectif uniquement
+     * Retourne les apprentis ayant au moins une session avec cet objectif
+     */
+    private function filtrerParObjectif( $idObjectif)
+    {
+        return Apprentis::with(['classes', 'sessions.objectifs'])
+            ->whereHas('sessions.objectifs', function ($q) use ($idObjectif) {
+                $q->where('objectifs.id_objectifs', $idObjectif);
+            })
+            ->orderBy('nom')
+            ->get();
+    }
+
+    /**
+     * Cas 4 — filtre par classe ET par objectif
+     */
+    private function filtrerParClasseEtObjectif( $idClasse,  $idObjectif)
+    {
+        return Apprentis::with(['classes', 'sessions.objectifs'])
+            ->where('id_classes', $idClasse)
+            ->whereHas('sessions.objectifs', function ($q) use ($idObjectif) {
+                $q->where('objectifs.id_objectifs', $idObjectif);
+            })
+            ->orderBy('nom')
+            ->get();
+    }
+
+    /**
+     * Formate un apprenti en tableau pour la réponse JSON
+     * Appelée par filtrer() pour normaliser chaque ligne
+     */
+    private function formaterApprentis($apprenti): array
+    {
+        $sessions = $apprenti->sessions->map(fn($session) => [
+            'id'                 => $session->id_sessions,
+            'date'               => \Carbon\Carbon::parse($session->date_heure)->format('d/m/Y H:i'),
+            'type_drone'         => $session->type_drone,
+            'type_environnement' => $session->type_environnement,
+            'conditions_meteo'   => $session->conditions_meteo,
+            'objectifs'          => $session->objectifs->map(fn($obj) => [
+                'libelle'              => $obj->libelle_objectifs,
+                'reussi'               => (bool) $obj->pivot->reussi,
+                'quantite_a_atteindre' => $obj->pivot->quantite_a_atteindre,
+                'quantite_realisee'    => $obj->pivot->quantite_realisee,
+            ]),
+        ]);
+
+        return [
+            'id'          => $apprenti->id_apprentis,
+            'nom'         => $apprenti->nom,
+            'prenom'      => $apprenti->prenom,
+            'classe'      => $apprenti->classes->libelle_classes ?? '—',
+            'nb_sessions' => $apprenti->sessions->count(),
+            'sessions'    => $sessions,
+        ];
     }
 }

@@ -223,13 +223,23 @@
             data  : { id_classes: idClasse, id_objectifs: idObjectif },
 
             success: function (data) {
-                tousLesApprentis = data;
-                afficherTableau(data);
+                
+    // ── Console JSON pour debug ──────────────────────────
+    console.group('📡 filtrer() — réponse AJAX');
+    console.log('Nombre d\'apprentis :', data.length);
+    console.log('Filtres actifs     :', { id_classes: idClasse, id_objectifs: idObjectif });
+    console.log('JSON complet       :', data);
+    console.groupEnd();
+    // ────────────────────────────────────────────────────
+
+    tousLesApprentis = data;
+    afficherTableau(data);
 
                 if (data.length > 0) {
                     $('#chartZone').show();
                     setTimeout(function () { initChart(data); }, 100);
                 }
+                
             },
 
             error: function () {
@@ -381,6 +391,6 @@
     // État initial des boutons au chargement (cas 1)
     mettreAJourBoutonsExport();
 
-</script>
+</script>  
 
 @endsection
