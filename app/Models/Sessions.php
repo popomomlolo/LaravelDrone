@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Meteo;
 
 class Sessions extends Model
 {
@@ -10,8 +11,17 @@ class Sessions extends Model
     protected $primaryKey = 'id_sessions';
 
     protected $fillable = [
-        'date_heure', 'type_environnement', 'conditions_meteo',
-        'type_drone', 'duree_max', 'login', 'id_apprentis'
+        'date_heure',
+        'type_environnement',
+        'id_meteo',
+        'type_drone',
+        'duree_max',
+        'login',
+        'id_apprentis'
+    ];
+
+    protected $casts = [
+        'type_environnement' => 'boolean',
     ];
 
     public function formateur()
@@ -22,6 +32,11 @@ class Sessions extends Model
     public function apprenti()
     {
         return $this->belongsTo(Apprentis::class, 'id_apprentis', 'id_apprentis');
+    }
+
+    public function meteo()
+    {
+        return $this->belongsTo(Meteo::class, 'id_meteo', 'id_meteo');
     }
 
     public function objectifs()

@@ -15,7 +15,7 @@ class ApprentisController extends Controller
         return view('apprenti-form', compact('apprentis'));
     }
 
-    public function getApprentis()
+    public function apiIndex()
     {
         $apprentis = Apprenti::with('classe')->orderBy('nom')->get()
             ->map(fn($a) => [
@@ -28,14 +28,14 @@ class ApprentisController extends Controller
         return response()->json($apprentis);
     }
 
-    public function showApprentis()
+    public function index()
     {
         $apprentis = Apprenti::orderBy('nom')->get();
         $classes = Classes::pluck('libelle_classes', 'id_classes');
         return view('apprentis', compact('apprentis', 'classes'));
     }
 
-    public function supprimer(Request $request)
+    public function destroy(Request $request)
     {
         $apprenti = Apprenti::find($request->apprenti_id);
         if (!$apprenti) {
@@ -46,7 +46,7 @@ class ApprentisController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function modifierForm(Request $request)
+    public function editForm(Request $request)
     {
         $apprenti = Apprenti::find($request->apprenti_id);
         $apprentis = Apprenti::orderBy('nom')->get();
@@ -77,7 +77,7 @@ class ApprentisController extends Controller
         ]);
     }
 
-    public function ajouter(Request $request)
+    public function store(Request $request)
     {
         Apprenti::create([
             'nom' => $request->nom,
