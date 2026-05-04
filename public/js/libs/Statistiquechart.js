@@ -19,7 +19,7 @@ function initChart(apprentis, objectifFiltre = null) {
                 if (objectifFiltre && obj.libelle !== objectifFiltre) {
                     return;
                 }
-                
+
                 if (!reussisParObjectif[obj.libelle]) {
                     reussisParObjectif[obj.libelle] = false;
                 }
@@ -44,17 +44,17 @@ function initChart(apprentis, objectifFiltre = null) {
     const categories = Object.keys(objectifsMap);
     const dataReussi = categories.map(function (k) { return objectifsMap[k].reussi; });
     const dataEchoue = categories.map(function (k) { return objectifsMap[k].echoue; });
-    const total      = apprentis.length;
+    const total = apprentis.length;
 
     console.log('Objectifs:', categories);
-    console.log('Réussis:',   dataReussi);
-    console.log('Échoués:',   dataEchoue);
+    console.log('Réussis:', dataReussi);
+    console.log('Échoués:', dataEchoue);
 
     // Titre dynamique selon le filtre
-    let titre = objectifFiltre 
-        ? 'Réussite : ' + objectifFiltre 
+    let titre = objectifFiltre
+        ? 'Réussite : ' + objectifFiltre
         : 'Réussite par objectif';
-    
+
     let sousTitre = objectifFiltre
         ? "Nombre d'apprentis ayant réussi ou échoué l'objectif (" + total + " apprentis)"
         : "Nombre d'apprentis ayant réussi ou échoué chaque objectif (" + total + " apprentis)";
@@ -79,8 +79,8 @@ function initChart(apprentis, objectifFiltre = null) {
             outside: true,
             formatter: function () {
                 return '<b>' + this.series.name + '</b><br>' + //Mot reussi ou echoué
-                       '<span style="color:' + this.color + '">●</span> ' +
-                       '<b>' + this.y + '</b> / ' + total + ' apprentis';
+                    '<span style="color:' + this.color + '">●</span> ' +
+                    '<b>' + this.y + '</b> / ' + total + ' apprentis';
             }
         },
         pane: {

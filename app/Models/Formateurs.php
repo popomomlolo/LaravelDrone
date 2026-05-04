@@ -9,12 +9,13 @@ use Illuminate\Notifications\Notifiable;
 class Formateurs extends Authenticatable
 {
     use HasFactory, Notifiable;
+
     protected $table = 'formateurs';
     protected $primaryKey = 'id_formateur';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
-    protected $fillable = ['id_formateur', 'login', 'mot_de_passe', 'nom', 'prenom'];
+    protected $fillable = ['login', 'mot_de_passe', 'nom', 'prenom'];
     protected $hidden = ['mot_de_passe'];
     public $timestamps = false;
 

@@ -10,16 +10,16 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('formateurs', function (Blueprint $table) {
-        $table->string('id_formateur')->primary();
-        $table->string('login');
-        $table->string('mot_de_passe');
-        $table->string('nom');
-        $table->string('prenom');
-        //$table->timestamps();
-    });
-}
+    {
+        Schema::create('formateurs', function (Blueprint $table) {
+            $table->id('id_formateur');
+            $table->string('login')->unique();
+            $table->string('mot_de_passe');
+            $table->string('nom');
+            $table->string('prenom');
+            //$table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

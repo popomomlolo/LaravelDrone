@@ -26,11 +26,8 @@ class AuthController extends Controller
             return redirect('/signup')->with('error', 'Ce login existe déjà.');
         }
 
-        // Générer automatiquement id_formateur (ex: FORM_20260504_001)
-        $idFormateur = 'FORM_' . date('Ymd') . '_' . str_pad(Formateurs::count() + 1, 3, '0', STR_PAD_LEFT);
-
+        // id_formateur est auto-incrémenté, pas besoin de le générer
         Formateurs::create([
-            'id_formateur' => $idFormateur,
             'login'        => $request->login,
             'mot_de_passe' => Hash::make($request->password),
             'nom'          => $request->nom,

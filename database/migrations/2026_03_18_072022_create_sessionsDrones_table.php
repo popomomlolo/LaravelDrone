@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -15,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('sessions_drone', function (Blueprint $table) {
             $table->id('id_session');
-            $table->dateTime('date_heure');
+            $table->dateTime('date_heure')->default(DB::raw('CURRENT_TIMESTAMP'));
 
             // true = extérieur, false = intérieur
             $table->boolean('type_environnement');
@@ -23,15 +24,15 @@ return new class extends Migration
             $table->boolean('type_drone');
             $table->integer('duree_max');
 
-            // Clé étrangère vers condition_meteo
+            // Clé étrangère vers conditions_meteo
             $table->unsignedBigInteger('id_meteo');
             $table->foreign('id_meteo')
                 ->references('id_meteo')
-                ->on('condition_meteo')
+                ->on('conditions_meteo')
                 ->onDelete('restrict');
 
-            // Clé étrangère vers formateurs (renommé depuis login)
-            $table->string('id_formateur');
+            // Clé étrangère vers formateurs
+            $table->unsignedBigInteger('id_formateur');
             $table->foreign('id_formateur')
                 ->references('id_formateur')
                 ->on('formateurs')

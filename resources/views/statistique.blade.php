@@ -142,10 +142,10 @@
         let tousLesApprentis = [];
         let tousLesObjectifs = @json($objectifs);
 
-        const urlFiltrer = '{{ route("statistique.filtrer") }}';
-        const urlCsv = '{{ route("statistique.csv") }}';
-        const urlPdf = '{{ route("statistique.pdf") }}';
-        
+        const urlFiltrer = '{{ route('statistique.filtrer') }}';
+        const urlCsv = '{{ route('statistique.csv') }}';
+        const urlPdf = '{{ route('statistique.pdf') }}';
+
         // Helper : récupère le nom de l'objectif par ID
         function getObjectifNom(idObjectif) {
             if (!idObjectif) return null;

@@ -10,13 +10,15 @@ class Sessions extends Model
     protected $primaryKey = 'id_session';
     public $timestamps    = false;
 
+    // date_heure a une valeur par défaut CURRENT_TIMESTAMP dans la migration
+    // Peut être omis lors de la création pour utiliser la date/heure actuelle
     protected $fillable = [
         'date_heure',
         'type_environnement',
         'type_drone',
         'duree_max',
         'id_meteo',
-        'id_formateur', // ← renommé depuis login
+        'id_formateur',
         'id_apprenti',
     ];
 

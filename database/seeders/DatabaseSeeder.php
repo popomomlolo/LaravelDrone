@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
 
         // ── 2. FORMATEURS ───────────────────────────────────────────
         DB::table('formateurs')->insert([
-            ['id_formateur' => 'FORM_20250101_001', 'login' => 'jmartin', 'mot_de_passe' => Hash::make('password123'), 'nom' => 'Martin', 'prenom' => 'Jacques'],
-            ['id_formateur' => 'FORM_20250101_002', 'login' => 'sdurand', 'mot_de_passe' => Hash::make('password123'), 'nom' => 'Durand',  'prenom' => 'Sophie'],
+            ['login' => 'jmartin', 'mot_de_passe' => Hash::make('password123'), 'nom' => 'Martin', 'prenom' => 'Jacques'],
+            ['login' => 'sdurand', 'mot_de_passe' => Hash::make('password123'), 'nom' => 'Durand',  'prenom' => 'Sophie'],
         ]);
 
         // ── 3. APPRENTIS (10 par classe) ────────────────────────────
@@ -72,27 +72,28 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ── 5. METEO ─────────────────────────────────────────────────
-        // condition_meteo : true = favorable, false = défavorable
+        // jour : true = jour, false = nuit
+        // ciel : 0=dégagé, 1=nuageux, 2=couvert, 3=pluvieux, 4=orageux
         // vent_x, vent_y, vent_z : composantes du vecteur vent (direction)
         // vent_norme : intensité du vent en m/s
-        DB::table('condition_meteo')->insert([
-            // 1 — Ensoleillé, vent faible du nord
-            ['condition_meteo' => true,  'vent_x' => 0.0, 'vent_y' => 2.0, 'vent_z' => 0.0, 'vent_norme' => 2.0],
-            // 2 — Nuageux, vent modéré
-            ['condition_meteo' => true,  'vent_x' => 1.5, 'vent_y' => 1.5, 'vent_z' => 0.0, 'vent_norme' => 4.2],
-            // 3 — Venteux, conditions difficiles
-            ['condition_meteo' => false, 'vent_x' => 5.0, 'vent_y' => 3.0, 'vent_z' => 0.5, 'vent_norme' => 8.5],
-            // 4 — Intérieur, pas de vent
-            ['condition_meteo' => true,  'vent_x' => 0.0, 'vent_y' => 0.0, 'vent_z' => 0.0, 'vent_norme' => 0.0],
-            // 5 — Ensoleillé, vent nul
-            ['condition_meteo' => true,  'vent_x' => 0.0, 'vent_y' => 0.5, 'vent_z' => 0.0, 'vent_norme' => 0.5],
-            // 6 — Mauvais temps, vent fort
-            ['condition_meteo' => false, 'vent_x' => 7.0, 'vent_y' => 4.0, 'vent_z' => 1.0, 'vent_norme' => 11.2],
+        DB::table('conditions_meteo')->insert([
+            // 1 — Jour ensoleillé, vent faible du nord
+            ['jour' => true,  'ciel' => 0, 'vent_x' => 0.0, 'vent_y' => 2.0, 'vent_z' => 0.0, 'vent_norme' => 2.0],
+            // 2 — Jour nuageux, vent modéré
+            ['jour' => true,  'ciel' => 1, 'vent_x' => 1.5, 'vent_y' => 1.5, 'vent_z' => 0.0, 'vent_norme' => 4.2],
+            // 3 — Jour pluvieux, conditions difficiles
+            ['jour' => true,  'ciel' => 3, 'vent_x' => 5.0, 'vent_y' => 3.0, 'vent_z' => 0.5, 'vent_norme' => 8.5],
+            // 4 — Intérieur, pas de vent (jour)
+            ['jour' => true,  'ciel' => 0, 'vent_x' => 0.0, 'vent_y' => 0.0, 'vent_z' => 0.0, 'vent_norme' => 0.0],
+            // 5 — Nuit dégagée, vent faible
+            ['jour' => false, 'ciel' => 0, 'vent_x' => 0.0, 'vent_y' => 0.5, 'vent_z' => 0.0, 'vent_norme' => 0.5],
+            // 6 — Jour orageux, vent fort
+            ['jour' => true,  'ciel' => 4, 'vent_x' => 7.0, 'vent_y' => 4.0, 'vent_z' => 1.0, 'vent_norme' => 11.2],
         ]);
 
         // ── 6 & 7. SESSIONS + VALIDER ────────────────────────────────
         // type_drone : true = drone pro, false = drone débutant (selon migration boolean)
-        $formateurs  = ['FORM_20250101_001', 'FORM_20250101_002']; // id_formateur
+        $formateurs  = [1, 2]; // id_formateur (auto-incrémentés)
         $durees      = [20, 30, 45, 60];
         $quantitesMax = [1 => 3, 2 => 2, 3 => 4, 4 => 1, 5 => 5];
 
@@ -139,6 +140,8 @@ class DatabaseSeeder extends Seeder
         $validations = [];
         $dateBase  = strtotime('2025-01-05');
 
+        // NOTE: date_heure est spécifiée ici pour avoir des données de test variées
+        // En production, on peut omettre ce champ pour utiliser CURRENT_TIMESTAMP automatiquement
         foreach ($planSessions as $apprentiId => $toutesLesSessions) {
             $dateOffset = 0;
 

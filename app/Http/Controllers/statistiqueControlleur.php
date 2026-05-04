@@ -140,7 +140,8 @@ class statistiqueControlleur extends Controller
             'date'               => \Carbon\Carbon::parse($session->date_heure)->format('d/m/Y H:i'),
             'type_drone'         => $session->type_drone,
             'type_environnement' => $session->type_environnement,
-            'meteo'              => $session->meteo->condition_meteo,
+            'jour'               => $session->meteo?->jour,
+            'ciel'               => $session->meteo?->ciel,
             'objectifs'          => $session->objectifs->map(fn($obj) => [
                 'libelle'              => $obj->libelle_objectif,
                 'reussi'               => (bool) $obj->pivot->reussi,

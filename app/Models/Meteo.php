@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Meteo extends Model
 {
-    protected $table = 'condition_meteo';
+    protected $table = 'conditions_meteo';
     protected $primaryKey = 'id_meteo';
     public $timestamps = false;
 
     protected $fillable = [
-        'condition_meteo',
+        'jour',
+        'ciel',
         'vent_x',
         'vent_y',
         'vent_z',
@@ -19,7 +20,8 @@ class Meteo extends Model
     ];
 
     protected $casts = [
-        'condition_meteo' => 'boolean',
+        'jour' => 'boolean',
+        'ciel' => 'integer',
     ];
 
     public function sessions()
