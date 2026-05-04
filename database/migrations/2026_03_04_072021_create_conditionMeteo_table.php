@@ -15,7 +15,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('meteo', function (Blueprint $table) {
+        Schema::create('condition_meteo', function (Blueprint $table) {
             $table->id('id_meteo');
 
             // Condition générale : true = favorable, false = défavorable
@@ -35,6 +35,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('meteo');
+        Schema::dropIfExists('condition_meteo');
     }
 };

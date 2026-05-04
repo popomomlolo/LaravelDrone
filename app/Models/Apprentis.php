@@ -7,17 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class Apprentis extends Model
 {
     protected $table = 'apprentis';
-    protected $primaryKey = 'id_apprentis';
+    protected $primaryKey = 'id_apprenti';
 
-    protected $fillable = ['nom', 'prenom', 'id_classes'];
+    protected $fillable = ['nom', 'prenom', 'id_classe'];
 
-    public function classes()
+    public $timestamps = false;
+
+    public function classe()
     {
-        return $this->belongsTo(Classes::class, 'id_classes', 'id_classes');
+        return $this->belongsTo(Classes::class, 'id_classe', 'id_classe');
     }
 
     public function sessions()
     {
-        return $this->hasMany(Sessions::class, 'id_apprentis', 'id_apprentis');
+        return $this->hasMany(Sessions::class, 'id_apprenti', 'id_apprenti');
     }
 }

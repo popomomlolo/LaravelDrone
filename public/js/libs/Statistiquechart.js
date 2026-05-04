@@ -2,7 +2,7 @@
  * Statistiquechart.js
  * Polar bar chart Highcharts — Réussite par objectif.
  */
-function initChart(apprentis) {
+function initChart(apprentis, objectifFiltre = null) {
 
     if (!apprentis || apprentis.length === 0 || !document.getElementById('chartContainer')) {
         return;
@@ -15,6 +15,11 @@ function initChart(apprentis) {
 
         apprenti.sessions.forEach(function (session) {
             session.objectifs.forEach(function (obj) {
+                // Si un objectif est filtré, ne compter que celui-ci
+                if (objectifFiltre && obj.libelle !== objectifFiltre) {
+                    return;
+                }
+                
                 if (!reussisParObjectif[obj.libelle]) {
                     reussisParObjectif[obj.libelle] = false;
                 }
@@ -45,6 +50,15 @@ function initChart(apprentis) {
     console.log('Réussis:',   dataReussi);
     console.log('Échoués:',   dataEchoue);
 
+    // Titre dynamique selon le filtre
+    let titre = objectifFiltre 
+        ? 'Réussite : ' + objectifFiltre 
+        : 'Réussite par objectif';
+    
+    let sousTitre = objectifFiltre
+        ? "Nombre d'apprentis ayant réussi ou échoué l'objectif (" + total + " apprentis)"
+        : "Nombre d'apprentis ayant réussi ou échoué chaque objectif (" + total + " apprentis)";
+
     Highcharts.chart('chartContainer', {
         chart: {
             type: 'column',
@@ -54,11 +68,11 @@ function initChart(apprentis) {
             style: { fontFamily: 'Raleway, sans-serif' }
         },
         title: {
-            text: 'Réussite par objectif',
+            text: titre,
             style: { fontWeight: '600', fontSize: '1rem', color: '#000' }
         },
         subtitle: {
-            text: "Nombre d'apprentis ayant réussi ou échoué chaque objectif (" + total + " apprentis)",
+            text: sousTitre,
             style: { color: '#636b6f', fontSize: '15px' }
         },
         tooltip: {

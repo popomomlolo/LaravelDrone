@@ -1,12 +1,28 @@
 @extends('layouts.sign')
-<link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+<link
+    rel="stylesheet"
+    href="{{ asset('css/auth.css') }}"
+>
 <div class="auth-container">
     <h1>Sign In</h1>
 
-    <form action="/signin" method="POST">
+    <form
+        action="/signin"
+        method="POST"
+    >
         @csrf
-        <input type="text" name="login" placeholder="login" required>
-        <input type="password" name="password" placeholder="Mot de passe" required>
+        <input
+            type="text"
+            name="login"
+            placeholder="Login"
+            required
+        >
+        <input
+            type="password"
+            name="password"
+            placeholder="Mot de passe"
+            required
+        >
         <button type="submit">Se connecter</button>
     </form>
 

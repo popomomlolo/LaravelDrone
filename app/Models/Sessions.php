@@ -3,49 +3,50 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Meteo;
 
 class Sessions extends Model
 {
-    protected $table = 'sessions_drone';
-    protected $primaryKey = 'id_sessions';
+    protected $table      = 'sessions_drone';
+    protected $primaryKey = 'id_session';
+    public $timestamps    = false;
 
     protected $fillable = [
         'date_heure',
         'type_environnement',
-        'id_meteo',
         'type_drone',
         'duree_max',
-        'login',
-        'id_apprentis'
+        'id_meteo',
+        'id_formateur', // ← renommé depuis login
+        'id_apprenti',
     ];
 
     protected $casts = [
         'type_environnement' => 'boolean',
+        'date_heure'         => 'datetime',
     ];
-
-    public function formateur()
-    {
-        return $this->belongsTo(Formateurs::class, 'login', 'login');
-    }
-
-    public function apprenti()
-    {
-        return $this->belongsTo(Apprentis::class, 'id_apprentis', 'id_apprentis');
-    }
 
     public function meteo()
     {
         return $this->belongsTo(Meteo::class, 'id_meteo', 'id_meteo');
     }
 
+    public function formateur()
+    {
+        return $this->belongsTo(Formateurs::class, 'id_formateur', 'id_formateur');
+    }
+
+    public function apprenti()
+    {
+        return $this->belongsTo(Apprentis::class, 'id_apprenti', 'id_apprenti');
+    }
+
     public function objectifs()
     {
         return $this->belongsToMany(
             Objectifs::class,
-            'valider',
-            'id_sessions',
-            'id_objectifs'
+            'validations',
+            'id_session',
+            'id_objectif'
         )->withPivot('reussi', 'quantite_a_atteindre', 'quantite_realisee');
     }
 }

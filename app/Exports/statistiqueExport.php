@@ -11,13 +11,13 @@ use Illuminate\Support\Collection;
 
 class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
-    protected ?string $idClasses;
-    protected ?string $idObjectifs;
+    protected ?string $idClasse;
+    protected ?string $idObjectif;
 
-    public function __construct(?string $idClasses = null, ?string $idObjectifs = null)
+    public function __construct(?string $idClasse = null, ?string $idObjectif = null)
     {
-        $this->idClasses   = $idClasses;
-        $this->idObjectifs = $idObjectifs;
+        $this->idClasse   = $idClasse;
+        $this->idObjectif = $idObjectif;
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -30,18 +30,18 @@ class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
     // ════════════════════════════════════════════════════════════════
     public function collection(): Collection
     {
-        $query = Apprentis::with(['classes', 'sessions.objectifs'])
+        $query = Apprentis::with(['classe', 'sessions.objectifs'])
             ->orderBy('nom');
 
         // Filtre par classe si renseigné (cas 2 et 4)
-        if ($this->idClasses) {
-            $query->where('id_classes', $this->idClasses);
+        if ($this->idClasse) {
+            $query->where('id_classe', $this->idClasse);
         }
 
         // Filtre par objectif si renseigné (cas 3 et 4)
-        if ($this->idObjectifs) {
+        if ($this->idObjectif) {
             $query->whereHas('sessions.objectifs', function ($q) {
-                $q->where('objectifs.id_objectifs', $this->idObjectifs);
+                $q->where('objectifs.id_objectif', $this->idObjectif);
             });
         }
 
@@ -60,7 +60,7 @@ class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
         $resultats = [];
         foreach ($apprenti->sessions as $session) {
             foreach ($session->objectifs as $obj) {
-                $libelle = $obj->libelle_objectifs;
+                $libelle = $obj->libelle_objectif;
                 // Une réussite suffit pour marquer l'objectif comme réussi
                 if (!isset($resultats[$libelle]) || !$resultats[$libelle]) {
                     $resultats[$libelle] = (bool) $obj->pivot->reussi;
@@ -77,7 +77,7 @@ class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
         return [
             'Nom'                 => $apprenti->nom,
             'Prénom'              => $apprenti->prenom,
-            'Classe'              => $apprenti->classes->libelle_classes ?? '—',
+            'Classe'              => $apprenti->classe->libelle_classe ?? '—',
             'Cerceaux'            => $statut('Cerceaux'),
             'Atterrissage'        => $statut('Atterrissage'),
             'Positionnement'      => $statut('Positionnement'),
@@ -90,9 +90,14 @@ class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
     public function headings(): array
     {
         return [
-            'Nom', 'Prénom', 'Classe',
-            'Cerceaux', 'Atterrissage', 'Positionnement',
-            "Maintien d'Altitude", 'Tours',
+            'Nom',
+            'Prénom',
+            'Classe',
+            'Cerceaux',
+            'Atterrissage',
+            'Positionnement',
+            "Maintien d'Altitude",
+            'Tours',
             'Nombre de sessions',
         ];
     }
@@ -111,18 +116,21 @@ class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
 
         // Charge les classes concernées
         $queryClasses = Classes::with(['apprentis.sessions.objectifs'])
-            ->orderBy('libelle_classes');
+            ->orderBy('libelle_classe');
 
         if ($idClasses) {
-            $queryClasses->where('id_classes', $idClasses);
+            $queryClasses->where('id_classe', $idClasses);
         }
 
         $classes = $queryClasses->get();
 
         // Noms de tous les objectifs à afficher dans les colonnes
         $tousLesObjectifs = [
-            'Cerceaux', 'Atterrissage', 'Positionnement',
-            "Maintien d'Altitude", 'Tours',
+            'Cerceaux',
+            'Atterrissage',
+            'Positionnement',
+            "Maintien d'Altitude",
+            'Tours',
         ];
 
         $html  = self::stylePdf();
@@ -137,7 +145,7 @@ class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
 
             if ($idObjectifs) {
                 $queryApprentis->whereHas('sessions.objectifs', function ($q) use ($idObjectifs) {
-                    $q->where('objectifs.id_objectifs', $idObjectifs);
+                    $q->where('objectifs.id_objectif', $idObjectifs);
                 });
             }
 
@@ -145,7 +153,7 @@ class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
 
             $html .= '<div class="' . ($isLastPage ? '' : 'page-break') . '">';
             $html .= '<h1>Drone Academy</h1>';
-            $html .= '<h2>' . htmlspecialchars($classe->libelle_classes) . '</h2>';
+            $html .= '<h2>' . htmlspecialchars($classe->libelle_classe) . '</h2>';
 
             // En-têtes du tableau
             $html .= '<table><thead><tr>';
@@ -198,7 +206,7 @@ class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
         $resultats = [];
         foreach ($apprenti->sessions as $session) {
             foreach ($session->objectifs as $obj) {
-                $libelle = $obj->libelle_objectifs;
+                $libelle = $obj->libelle_objectif;
                 if (!isset($resultats[$libelle]) || !$resultats[$libelle]) {
                     $resultats[$libelle] = (bool) $obj->pivot->reussi;
                 }
@@ -213,8 +221,8 @@ class statistiqueExport implements FromCollection, WithHeadings, ShouldAutoSize
      */
     private static function objectifCorrespondAuFiltre(string $libelle, string $idObjectifs): bool
     {
-        return \App\Models\Objectifs::where('id_objectifs', $idObjectifs)
-            ->where('libelle_objectifs', $libelle)
+        return \App\Models\Objectifs::where('id_objectif', $idObjectifs)
+            ->where('libelle_objectif', $libelle)
             ->exists();
     }
 

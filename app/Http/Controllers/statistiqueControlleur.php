@@ -18,8 +18,8 @@ class statistiqueControlleur extends Controller
     // ════════════════════════════════════════════════════════════════
     public function index()
     {
-        $classes   = Classes::orderBy('libelle_classes')->get();
-        $objectifs = Objectifs::orderBy('libelle_objectifs')->get();
+        $classes   = Classes::orderBy('libelle_classe')->get();
+        $objectifs = Objectifs::orderBy('libelle_objectif')->get();
         $apprentis = Apprentis::orderBy('nom')->get();
 
         return view('statistique', compact('classes', 'objectifs', 'apprentis'));
@@ -27,50 +27,25 @@ class statistiqueControlleur extends Controller
 
     // ════════════════════════════════════════════════════════════════
     // AJAX — FILTRER
-    // Aiguille vers la bonne fonction selon les filtres reçus
-    // Un seul return à la fin
     // ════════════════════════════════════════════════════════════════
     public function filtrer(): JsonResponse
     {
-        $idClasse   = request('id_classes')   ?: false;
-        $idObjectif = request('id_objectifs') ?: false;
-/*
-si class_
-        si objectif
-        alors
-            filtrerparclasseetobjectif
-        sinon
-            filtrerparclasse
-        finsi
-sinon
-        si objectif
-        alors
-            filtrerparobjectif
-        finsi
-finsi
+        $idClasse   = request('id_classe')   ?: false;
+        $idObjectif = request('id_objectif') ?: false;
 
-
-
-
-        */
-        // Sélection du cas selon les filtres présents
-
- if ($idClasse) { 
-                if ($idObjectif) {
-                    $apprentis = $this->filtrerParClasseEtObjectif($idClasse, $idObjectif);
-                } else {
-                    $apprentis = $this->filtrerParClasse($idClasse);
-                }
-                
+        if ($idClasse) {
+            if ($idObjectif) {
+                $apprentis = $this->filtrerParClasseEtObjectif($idClasse, $idObjectif);
             } else {
-                if ($idObjectif) {
-                    $apprentis = $this->filtrerParObjectif($idObjectif);
-                } else {
-                    $apprentis = collect(); // Cas 1 : aucun filtre
-                }
+                $apprentis = $this->filtrerParClasse($idClasse);
             }
-
-        
+        } else {
+            if ($idObjectif) {
+                $apprentis = $this->filtrerParObjectif($idObjectif);
+            } else {
+                $apprentis = collect(); // Cas 1 : aucun filtre
+            }
+        }
 
         $result = $apprentis->map(fn($a) => $this->formaterApprentis($a));
 
@@ -79,14 +54,13 @@ finsi
 
     // ════════════════════════════════════════════════════════════════
     // EXPORT CSV
-    // 
     // ════════════════════════════════════════════════════════════════
     public function exportCsv()
     {
-        $idClasses   = request('id_classes')   ?: null;
-        $idObjectifs = request('id_objectifs') ?: null;
+        $idClasse   = request('id_classe')   ?: null;
+        $idObjectif = request('id_objectif') ?: null;
 
-        $export   = new statistiqueExport($idClasses, $idObjectifs);
+        $export   = new statistiqueExport($idClasse, $idObjectif);
         $fileName = 'resultats_' . now()->format('Ymd_His') . '.csv';
         $headers  = ['Content-Type' => 'text/csv; charset=UTF-8'];
 
@@ -95,21 +69,19 @@ finsi
 
     // ════════════════════════════════════════════════════════════════
     // EXPORT PDF
-    // abort_if remplace le if + return pour le blocage sans filtre
-    // 
     // ════════════════════════════════════════════════════════════════
     public function exportPdf()
     {
-        $idClasses   = request('id_classes')   ?: null;
-        $idObjectifs = request('id_objectifs') ?: null;
+        $idClasse   = request('id_classe')   ?: null;
+        $idObjectif = request('id_objectif') ?: null;
 
         abort_if(
-            !$idClasses && !$idObjectifs,
+            !$idClasse && !$idObjectif,
             400,
             'Sélectionnez au moins un filtre pour exporter en PDF.'
         );
 
-        $html     = statistiqueExport::genererHtmlPdf($idClasses, $idObjectifs);
+        $html     = statistiqueExport::genererHtmlPdf($idClasse, $idObjectif);
         $fileName = 'resultats_' . now()->format('Ymd_His') . '.pdf';
 
         $pdf = Pdf::loadHTML($html)
@@ -119,15 +91,13 @@ finsi
         return $pdf->download($fileName);
     }
 
-
-
     /**
      * Cas 2 — filtre par classe uniquement
      */
-    private function filtrerParClasse( $idClasse)
+    private function filtrerParClasse($idClasse)
     {
-        return Apprentis::with(['classes', 'sessions.objectifs'])
-            ->where('id_classes', $idClasse)
+        return Apprentis::with(['classe', 'sessions.objectifs'])
+            ->where('id_classe', $idClasse)
             ->orderBy('nom')
             ->get();
     }
@@ -136,11 +106,11 @@ finsi
      * Cas 3 — filtre par objectif uniquement
      * Retourne les apprentis ayant au moins une session avec cet objectif
      */
-    private function filtrerParObjectif( $idObjectif)
+    private function filtrerParObjectif($idObjectif)
     {
-        return Apprentis::with(['classes', 'sessions.objectifs'])
+        return Apprentis::with(['classe', 'sessions.objectifs'])
             ->whereHas('sessions.objectifs', function ($q) use ($idObjectif) {
-                $q->where('objectifs.id_objectifs', $idObjectif);
+                $q->where('objectifs.id_objectif', $idObjectif);
             })
             ->orderBy('nom')
             ->get();
@@ -149,12 +119,12 @@ finsi
     /**
      * Cas 4 — filtre par classe ET par objectif
      */
-    private function filtrerParClasseEtObjectif( $idClasse,  $idObjectif)
+    private function filtrerParClasseEtObjectif($idClasse, $idObjectif)
     {
-        return Apprentis::with(['classes', 'sessions.objectifs'])
-            ->where('id_classes', $idClasse)
+        return Apprentis::with(['classe', 'sessions.objectifs'])
+            ->where('id_classe', $idClasse)
             ->whereHas('sessions.objectifs', function ($q) use ($idObjectif) {
-                $q->where('objectifs.id_objectifs', $idObjectif);
+                $q->where('objectifs.id_objectif', $idObjectif);
             })
             ->orderBy('nom')
             ->get();
@@ -162,18 +132,17 @@ finsi
 
     /**
      * Formate un apprenti en tableau pour la réponse JSON
-     * Appelée par filtrer() pour normaliser chaque ligne
      */
     private function formaterApprentis($apprenti): array
     {
         $sessions = $apprenti->sessions->map(fn($session) => [
-            'id'                 => $session->id_sessions,
+            'id'                 => $session->id_session,
             'date'               => \Carbon\Carbon::parse($session->date_heure)->format('d/m/Y H:i'),
             'type_drone'         => $session->type_drone,
             'type_environnement' => $session->type_environnement,
-            'conditions_meteo'   => $session->conditions_meteo,
+            'meteo'              => $session->meteo->condition_meteo,
             'objectifs'          => $session->objectifs->map(fn($obj) => [
-                'libelle'              => $obj->libelle_objectifs,
+                'libelle'              => $obj->libelle_objectif,
                 'reussi'               => (bool) $obj->pivot->reussi,
                 'quantite_a_atteindre' => $obj->pivot->quantite_a_atteindre,
                 'quantite_realisee'    => $obj->pivot->quantite_realisee,
@@ -181,10 +150,10 @@ finsi
         ]);
 
         return [
-            'id'          => $apprenti->id_apprentis,
+            'id'          => $apprenti->id_apprenti,
             'nom'         => $apprenti->nom,
             'prenom'      => $apprenti->prenom,
-            'classe'      => $apprenti->classes->libelle_classes ?? '—',
+            'classe'      => $apprenti->classe->libelle_classe ?? '—',
             'nb_sessions' => $apprenti->sessions->count(),
             'sessions'    => $sessions,
         ];

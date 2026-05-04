@@ -10,17 +10,29 @@ class Formateurs extends Authenticatable
 {
     use HasFactory, Notifiable;
     protected $table = 'formateurs';
-    protected $primaryKey = 'login';
+    protected $primaryKey = 'id_formateur';
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['login', 'mot_de_passe', 'nom', 'prenom'];
+    protected $fillable = ['id_formateur', 'login', 'mot_de_passe', 'nom', 'prenom'];
     protected $hidden = ['mot_de_passe'];
     public $timestamps = false;
+
     public function sessions()
     {
-        return $this->hasMany(Sessions::class, 'login', 'login');
+        return $this->hasMany(Sessions::class, 'id_formateur', 'id_formateur');
     }
+
+    public function getAuthIdentifier()
+    {
+        return $this->getAttribute('login');
+    }
+
+    public function getAuthIdentifierName()
+    {
+        return 'login';
+    }
+
     public function getAuthPassword()
     {
         return $this->mot_de_passe;

@@ -26,12 +26,15 @@ class AuthController extends Controller
             return redirect('/signup')->with('error', 'Ce login existe déjà.');
         }
 
-        // Créer un nouvel utilisateur
-        $formateur = Formateurs::create([
-            'login' => $request->login,
+        // Générer automatiquement id_formateur (ex: FORM_20260504_001)
+        $idFormateur = 'FORM_' . date('Ymd') . '_' . str_pad(Formateurs::count() + 1, 3, '0', STR_PAD_LEFT);
+
+        Formateurs::create([
+            'id_formateur' => $idFormateur,
+            'login'        => $request->login,
             'mot_de_passe' => Hash::make($request->password),
-            'nom' => $request->nom,
-            'prenom' => $request->prenom,
+            'nom'          => $request->nom,
+            'prenom'       => $request->prenom,
         ]);
 
         return redirect('/signin')->with('success', 'Inscription réussie ! Veuillez vous connecter.');
@@ -39,18 +42,17 @@ class AuthController extends Controller
 
     public function signin(Request $request)
     {
-        // Vérifier les identifiants - mapping des champs pour l'authentification
         $credentials = [
-            'login' => $request->login,
-            'password' => $request->password
+            'login'    => $request->login,
+            'password' => $request->password,
         ];
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect('/apprentis')->with('success', 'Connexion réussie !');
+            return redirect('/historique')->with('success', 'Connexion réussie !');
         }
 
-        return redirect('/signin')->with('error', 'login ou mot de passe incorrect.');
+        return redirect('/signin')->with('error', 'Login ou mot de passe incorrect.');
     }
 
     public function signout(Request $request)

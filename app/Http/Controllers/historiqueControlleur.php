@@ -13,11 +13,11 @@ class historiqueControlleur extends Controller
     public function index()
     {
         $sessions = Sessions::with([
-            'apprenti.classes', // Apprenti + sa Classe
-            'objectifs',        // Objectifs avec le pivot (reussi, quantites)
+            'apprenti.classe', // Apprenti + sa Classe
+            'objectifs',       // Objectifs avec le pivot (reussi, quantites)
         ])
-        ->orderBy('date_heure', 'desc')
-        ->get();
+            ->orderBy('date_heure', 'desc')
+            ->get();
 
         return view('historique', compact('sessions'));
     }

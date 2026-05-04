@@ -19,11 +19,11 @@ class ApprentisController extends Controller
     {
         $apprentis = Apprenti::with('classe')->orderBy('nom')->get()
             ->map(fn($a) => [
-                'id_apprentis'    => $a->id_apprentis,
-                'nom'             => $a->nom,
-                'prenom'          => $a->prenom,
-                'id_classes'      => $a->id_classes,
-                'libelle_classes' => $a->classe->libelle_classes ?? $a->id_classes,
+                'id_apprenti'    => $a->id_apprenti,
+                'nom'            => $a->nom,
+                'prenom'         => $a->prenom,
+                'id_classe'      => $a->id_classe,
+                'libelle_classe' => $a->classe->libelle_classe ?? $a->id_classe,
             ]);
         return response()->json($apprentis);
     }
@@ -31,7 +31,7 @@ class ApprentisController extends Controller
     public function index()
     {
         $apprentis = Apprenti::orderBy('nom')->get();
-        $classes = Classes::pluck('libelle_classes', 'id_classes');
+        $classes = Classes::pluck('libelle_classe', 'id_classe');
         return view('apprentis', compact('apprentis', 'classes'));
     }
 
@@ -41,7 +41,7 @@ class ApprentisController extends Controller
         if (!$apprenti) {
             return response()->json(['success' => false, 'message' => 'Apprenti introuvable'], 404);
         }
-        DB::table('sessions_drone')->where('id_apprentis', $request->apprenti_id)->delete();
+        DB::table('sessions_drone')->where('id_apprenti', $request->apprenti_id)->delete();
         $apprenti->delete();
         return response()->json(['success' => true]);
     }
@@ -50,7 +50,7 @@ class ApprentisController extends Controller
     {
         $apprenti = Apprenti::find($request->apprenti_id);
         $apprentis = Apprenti::orderBy('nom')->get();
-        $classes = Classes::pluck('libelle_classes', 'id_classes');
+        $classes = Classes::pluck('libelle_classe', 'id_classe');
         return view('apprentis', compact('apprentis', 'apprenti', 'classes'));
     }
 
@@ -60,29 +60,29 @@ class ApprentisController extends Controller
         if (!$apprenti) {
             return response()->json(['success' => false, 'message' => 'Apprenti introuvable'], 404);
         }
-        $apprenti->nom       = $request->nom;
-        $apprenti->prenom    = $request->prenom;
-        $apprenti->id_classes = $request->id_classes;
+        $apprenti->nom      = $request->nom;
+        $apprenti->prenom   = $request->prenom;
+        $apprenti->id_classe = $request->id_classe;
         $apprenti->save();
 
-        $libelle = Classes::find($request->id_classes)->libelle_classes ?? $request->id_classes;
+        $libelle = Classes::find($request->id_classe)->libelle_classe ?? $request->id_classe;
 
         return response()->json([
-            'success'         => true,
-            'id_apprentis'    => $apprenti->id_apprentis,
-            'nom'             => $apprenti->nom,
-            'prenom'          => $apprenti->prenom,
-            'id_classes'      => $apprenti->id_classes,
-            'libelle_classes' => $libelle,
+            'success'        => true,
+            'id_apprenti'    => $apprenti->id_apprenti,
+            'nom'            => $apprenti->nom,
+            'prenom'         => $apprenti->prenom,
+            'id_classe'      => $apprenti->id_classe,
+            'libelle_classe' => $libelle,
         ]);
     }
 
     public function store(Request $request)
     {
         Apprenti::create([
-            'nom' => $request->nom,
-            'prenom' => $request->prenom,
-            'id_classes' => $request->id_classes,
+            'nom'       => $request->nom,
+            'prenom'    => $request->prenom,
+            'id_classe' => $request->id_classe,
         ]);
         return redirect('/apprentis')->with('success', 'Apprenti ajouté avec succès');
     }
@@ -100,16 +100,11 @@ class ApprentisController extends Controller
             }
             if (count($row) >= 3) {
                 $libelleClasse = trim($row[2]);
-
-                // Cherche la classe par son libellé, la crée si elle n'existe pas
-                $classe = Classes::firstOrCreate(
-                    ['libelle_classes' => $libelleClasse]
-                );
-
+                $classe = Classes::firstOrCreate(['libelle_classe' => $libelleClasse]);
                 Apprenti::create([
-                    'nom'        => trim($row[0]),
-                    'prenom'     => trim($row[1]),
-                    'id_classes' => $classe->id_classes,
+                    'nom'       => trim($row[0]),
+                    'prenom'    => trim($row[1]),
+                    'id_classe' => $classe->id_classe,
                 ]);
                 $count++;
             }

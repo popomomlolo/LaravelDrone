@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
 {
     Schema::create('formateurs', function (Blueprint $table) {
-        $table->string('login')->primary();
+        $table->string('id_formateur')->primary();
+        $table->string('login');
         $table->string('mot_de_passe');
         $table->string('nom');
         $table->string('prenom');

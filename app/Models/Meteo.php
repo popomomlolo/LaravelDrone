@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Meteo extends Model
 {
-    protected $table = 'meteo';
+    protected $table = 'condition_meteo';
     protected $primaryKey = 'id_meteo';
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'condition_meteo',

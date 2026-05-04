@@ -51,7 +51,7 @@
             <div style="margin-bottom:0.5rem;">
                 <label>Classe :</label>
                 <select
-                    name="id_classes"
+                    name="id_classe"
                     required
                     style="width:100%;padding:0.3rem;"
                 >
@@ -73,7 +73,7 @@
         style="display:none;margin-bottom:2rem;padding:1rem;border:1px solid #ddd;border-radius:8px;max-width:400px;"
     >
         <h3>Importer plusieurs apprentis (CSV)</h3>
-        <p style="font-size:0.85rem;color:#666;">Format : <code>nom,prenom,libelle_classes</code> (avec entête)</p>
+        <p style="font-size:0.85rem;color:#666;">Format : <code>nom,prenom,libelle_classe</code> (avec entête)</p>
         <form
             action="/apprentis/import-csv"
             method="POST"
@@ -156,7 +156,7 @@
                 <div style="margin-bottom:1rem;">
                     <label style="display:block;margin-bottom:0.25rem;">Classe :</label>
                     <select
-                        name="id_classes"
+                        name="id_classe"
                         id="modifierClasse"
                         required
                         style="width:100%;padding:0.5rem;background:#0d0f14;border:1px solid #2a2f3d;border-radius:6px;color:#e2e8f0;"
@@ -233,7 +233,7 @@
                         data: 'prenom'
                     },
                     {
-                        data: 'libelle_classes'
+                        data: 'libelle_classe'
                     },
                     {
                         data: null,
@@ -241,13 +241,13 @@
                         searchable: false,
                         render: function(data) {
                             return '<button class="btn-modifier" ' +
-                                'data-id="' + data.id_apprentis + '" ' +
+                                'data-id="' + data.id_apprenti + '" ' +
                                 'data-nom="' + data.nom + '" ' +
                                 'data-prenom="' + data.prenom + '" ' +
-                                'data-id_classes="' + data.id_classes + '" ' +
+                                'data-id_classe="' + data.id_classe + '" ' +
                                 'style="background:#007bff;color:#fff;border:none;padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;margin-right:0.4rem;">✏️ Modifier</button>' +
                                 '<button class="btn-supprimer" ' +
-                                'data-id="' + data.id_apprentis + '" ' +
+                                'data-id="' + data.id_apprenti + '" ' +
                                 'data-nom="' + data.nom + '" ' +
                                 'data-prenom="' + data.prenom + '" ' +
                                 'style="background:#dc3545;color:#fff;border:none;padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;">🗑️ Supprimer</button>';
@@ -265,7 +265,7 @@
                 $('#modifierId').val($(this).data('id'));
                 $('#modifierNom').val($(this).data('nom'));
                 $('#modifierPrenom').val($(this).data('prenom'));
-                $('#modifierClasse').val($(this).data('id_classes'));
+                $('#modifierClasse').val($(this).data('id_classe'));
                 $('#modalModifier').css('display', 'flex');
             });
 

@@ -36,7 +36,7 @@
                     </td>
 
                     <td>
-                        {{ $session->apprenti->classes->libelle_classes ?? '—' }}
+                    {{ $session->apprenti->classe->libelle_classe ?? '—' }}
                     </td>
 
                     <td>

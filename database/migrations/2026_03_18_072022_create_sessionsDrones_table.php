@@ -8,40 +8,39 @@ return new class extends Migration
 {
     /**
      * Crée la table sessions_drone
-     *
-     * conditions_meteo est remplacé par une clé étrangère id_meteo
-     * qui pointe vers la table meteo
+     * Dépend de : meteo, formateurs, apprentis
+     * Cette migration doit être exécutée APRÈS ces 3 tables
      */
     public function up(): void
     {
         Schema::create('sessions_drone', function (Blueprint $table) {
-            $table->id('id_sessions');
+            $table->id('id_session');
             $table->dateTime('date_heure');
 
             // true = extérieur, false = intérieur
             $table->boolean('type_environnement');
 
-            $table->string('type_drone');
+            $table->boolean('type_drone');
             $table->integer('duree_max');
 
-            // Clé étrangère vers la table meteo
+            // Clé étrangère vers condition_meteo
             $table->unsignedBigInteger('id_meteo');
             $table->foreign('id_meteo')
                 ->references('id_meteo')
-                ->on('meteo')
+                ->on('condition_meteo')
                 ->onDelete('restrict');
 
-            // Clé étrangère vers formateurs
-            $table->string('login');
-            $table->foreign('login')
-                ->references('login')
+            // Clé étrangère vers formateurs (renommé depuis login)
+            $table->string('id_formateur');
+            $table->foreign('id_formateur')
+                ->references('id_formateur')
                 ->on('formateurs')
                 ->onDelete('restrict');
 
             // Clé étrangère vers apprentis
-            $table->unsignedBigInteger('id_apprentis');
-            $table->foreign('id_apprentis')
-                ->references('id_apprentis')
+            $table->unsignedBigInteger('id_apprenti');
+            $table->foreign('id_apprenti')
+                ->references('id_apprenti')
                 ->on('apprentis')
                 ->onDelete('restrict');
 

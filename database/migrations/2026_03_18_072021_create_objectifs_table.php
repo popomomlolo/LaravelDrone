@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
 {
     Schema::create('objectifs', function (Blueprint $table) {
-        $table->id('id_objectifs');
-        $table->string('libelle_objectifs');
+        $table->id('id_objectif');
+        $table->string('libelle_objectif');
         $table->boolean('est_automatique');
         //$table->timestamps();
     });
