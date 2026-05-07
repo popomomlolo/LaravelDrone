@@ -16,7 +16,7 @@
     <div class="page-wrap">
 
         <div class="page-title">Statistiques</div>
-        <p class="page-sub">Filtrez par classe et/ou par objectif — exportez en CSV ou PDF</p>
+        <p class="page-sub">Filtrez par classe et/ou par objectif (ou affichez tout) — exportez en CSV ou PDF</p>
 
         {{-- ════════════════════════════════════
          COMBOBOX — filtrent le tableau ET les exports
@@ -78,7 +78,6 @@
         <button
             id="btnPdf"
             class="btn-export btn-pdf"
-            disabled
         >
             ⬇ Export PDF
         </button>
@@ -154,27 +153,19 @@
         }
 
         // ════════════════════════════════════════════════════════════════
-        // GESTION DES BOUTONS D'EXPORT SELON LES 4 CAS
+        // GESTION DES BOUTONS D'EXPORT SELON LES 5 CAS
         //
-        // Cas 1 : aucun filtre   → CSV toutes classes, PDF désactivé
-        // Cas 2 : classe seule   → CSV classe filtrée, PDF activé
-        // Cas 3 : objectif seul  → CSV personnes ayant fait cet objectif, PDF activé
-        // Cas 4 : classe+objectif→ CSV classe+objectif filtrés, PDF activé
+        // Cas 1 : aucun filtre   → CSV + PDF toutes classes (toutes les données)
+        // Cas 2 : classe seule   → CSV + PDF classe filtrée
+        // Cas 3 : objectif seul  → CSV + PDF personnes ayant fait cet objectif
+        // Cas 4 : classe+objectif→ CSV + PDF classe+objectif filtrés
         // ════════════════════════════════════════════════════════════════
         function mettreAJourBoutonsExport() {
 
-            const idClasse = $('#selectClasse').val();
-            const idObjectif = $('#selectObjectif').val();
-
-            // CSV toujours disponible (exporte selon les filtres actifs)
-            $('#btnCsv').prop('disabled', false);
-
-            // PDF désactivé uniquement si aucun filtre (cas 1)
-            if (!idClasse && !idObjectif) {
-                $('#btnPdf').prop('disabled', true).attr('title', 'Sélectionnez au moins un filtre pour exporter en PDF');
-            } else {
-                $('#btnPdf').prop('disabled', false).attr('title', '');
-            }
+            // CSV et PDF toujours disponibles (exportent selon les filtres actifs)
+            // Si aucun filtre, exporte toutes les données
+            $('#btnCsv').prop('disabled', false).attr('title', '');
+            $('#btnPdf').prop('disabled', false).attr('title', '');
         }
 
         // ════════════════════════════════════════════════════════════════
@@ -189,20 +180,7 @@
             // Met à jour l'état des boutons export
             mettreAJourBoutonsExport();
 
-            // Cas 1 : aucun filtre → remet l'état vide
-            if (!idClasse && !idObjectif) {
-                $('#tableZone').html(
-                    '<p class="msg-info">Sélectionnez au moins un filtre pour afficher les résultats.</p>'
-                );
-                $('#chartZone').hide();
-                if (tableInstance) {
-                    tableInstance.destroy();
-                    tableInstance = null;
-                }
-                return;
-            }
-
-            // Cas 2, 3 ou 4 → charge les données
+            // Charge toujours les données (même sans filtre = afficher tout)
             chargerDonnees(idClasse, idObjectif);
         });
 
@@ -445,6 +423,9 @@
 
         // État initial des boutons au chargement (cas 1)
         mettreAJourBoutonsExport();
+
+        // Charge automatiquement toutes les données au démarrage
+        chargerDonnees('', '');
     </script>
 
 @endsection

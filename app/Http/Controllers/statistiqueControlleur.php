@@ -43,7 +43,8 @@ class statistiqueControlleur extends Controller
             if ($idObjectif) {
                 $apprentis = $this->filtrerParObjectif($idObjectif);
             } else {
-                $apprentis = collect(); // Cas 1 : aucun filtre
+                // Cas "Toutes les classes" + "Tous les objectifs" : afficher tout
+                $apprentis = $this->filtrerTout();
             }
         }
 
@@ -75,12 +76,7 @@ class statistiqueControlleur extends Controller
         $idClasse   = request('id_classe')   ?: null;
         $idObjectif = request('id_objectif') ?: null;
 
-        abort_if(
-            !$idClasse && !$idObjectif,
-            400,
-            'Sélectionnez au moins un filtre pour exporter en PDF.'
-        );
-
+        // On accepte maintenant l'export même sans filtre (toutes les données)
         $html     = statistiqueExport::genererHtmlPdf($idClasse, $idObjectif);
         $fileName = 'resultats_' . now()->format('Ymd_His') . '.pdf';
 
@@ -126,6 +122,17 @@ class statistiqueControlleur extends Controller
             ->whereHas('sessions.objectifs', function ($q) use ($idObjectif) {
                 $q->where('objectifs.id_objectif', $idObjectif);
             })
+            ->orderBy('nom')
+            ->get();
+    }
+
+    /**
+     * Cas 5 — aucun filtre (toutes les classes + tous les objectifs)
+     * Retourne tous les apprentis avec toutes leurs sessions
+     */
+    private function filtrerTout()
+    {
+        return Apprentis::with(['classe', 'sessions.objectifs', 'sessions.meteo'])
             ->orderBy('nom')
             ->get();
     }

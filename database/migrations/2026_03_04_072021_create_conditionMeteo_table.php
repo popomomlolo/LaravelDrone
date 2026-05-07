@@ -10,7 +10,7 @@ return new class extends Migration
      * Crée la table meteo
      *
      * jour : true = jour, false = nuit
-     * ciel : code du type de ciel (0=dégagé, 1=nuageux, 2=couvert, 3=pluvieux, 4=orageux)
+     * ciel : code du type de ciel (0=dégagé, 1=nuageux, 2=couvert, 3=pluvieux)
      * vent_x, vent_y, vent_z : direction du vent (vecteur 3D)
      * vent_norme : intensité du vent en m/s
      */
@@ -21,8 +21,8 @@ return new class extends Migration
 
             // true = jour, false = nuit
             $table->boolean('jour');
-            
-            // Type de ciel (0=dégagé, 1=nuageux, 2=couvert, 3=pluvieux, 4=orageux)
+
+            // Type de ciel (0=dégagé, 1=nuageux, 2=couvert, 3=pluvieux)
             $table->integer('ciel');
 
             // Direction du vent sur les 3 axes (vecteur)

@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
 
         // ── 5. METEO ─────────────────────────────────────────────────
         // jour : true = jour, false = nuit
-        // ciel : 0=dégagé, 1=nuageux, 2=couvert, 3=pluvieux, 4=orageux
+        // ciel : 0=dégagé, 1=nuageux, 2=couvert, 3=pluvieux
         // vent_x, vent_y, vent_z : composantes du vecteur vent (direction)
         // vent_norme : intensité du vent en m/s
         DB::table('conditions_meteo')->insert([
@@ -87,8 +87,7 @@ class DatabaseSeeder extends Seeder
             ['jour' => true,  'ciel' => 0, 'vent_x' => 0.0, 'vent_y' => 0.0, 'vent_z' => 0.0, 'vent_norme' => 0.0],
             // 5 — Nuit dégagée, vent faible
             ['jour' => false, 'ciel' => 0, 'vent_x' => 0.0, 'vent_y' => 0.5, 'vent_z' => 0.0, 'vent_norme' => 0.5],
-            // 6 — Jour orageux, vent fort
-            ['jour' => true,  'ciel' => 4, 'vent_x' => 7.0, 'vent_y' => 4.0, 'vent_z' => 1.0, 'vent_norme' => 11.2],
+            
         ]);
 
         // ── 6 & 7. SESSIONS + VALIDER ────────────────────────────────

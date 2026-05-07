@@ -113,10 +113,10 @@
     {{-- Modale Modifier --}}
     <div
         id="modalModifier"
-        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;padding:2rem 0;"
     >
         <div
-            style="background:#1a1a2e;color:#e2e8f0;padding:2rem;border-radius:12px;width:420px;max-width:90vw;position:relative;border:1px solid #2a2f3d;">
+            style="background:#1a1a2e;color:#e2e8f0;padding:2rem;border-radius:12px;width:420px;max-width:90vw;position:relative;border:1px solid #2a2f3d;margin:0 auto;">
             <button
                 id="closeModifier"
                 style="position:absolute;top:0.75rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#aaa;"
@@ -184,10 +184,10 @@
     {{-- Modale Confirmation Suppression --}}
     <div
         id="modalSupprimer"
-        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;padding:2rem 0;"
     >
         <div
-            style="background:#1a1a2e;color:#e2e8f0;padding:2rem;border-radius:12px;width:380px;max-width:90vw;position:relative;border:1px solid #2a2f3d;text-align:center;">
+            style="background:#1a1a2e;color:#e2e8f0;padding:2rem;border-radius:12px;width:380px;max-width:90vw;position:relative;border:1px solid #2a2f3d;text-align:center;margin:0 auto;">
             <div style="font-size:3rem;margin-bottom:0.5rem;">⚠️</div>
             <h3 style="margin-bottom:0.5rem;">Confirmer la suppression</h3>
             <p style="color:#aaa;margin-bottom:1.5rem;">Voulez-vous vraiment supprimer <strong
@@ -224,7 +224,17 @@
             var table = $('#apprentisTable').DataTable({
                 ajax: {
                     url: '/api/apprentis',
-                    dataSrc: ''
+                    dataSrc: function(json) {
+                        // ✅ Console.log pour vérifier la structure JSON
+                        console.log('=== Structure JSON retournée par /api/apprentis ===');
+                        console.log('Nombre d\'apprentis:', json.length);
+                        if (json.length > 0) {
+                            console.log('Structure du premier apprenti:', json[0]);
+                            console.log('Champs disponibles:', Object.keys(json[0]));
+                        }
+                        console.log('Données complètes:', json);
+                        return json;
+                    }
                 },
                 columns: [{
                         data: 'nom'
@@ -266,7 +276,7 @@
                 $('#modifierNom').val($(this).data('nom'));
                 $('#modifierPrenom').val($(this).data('prenom'));
                 $('#modifierClasse').val($(this).data('id_classe'));
-                $('#modalModifier').css('display', 'flex');
+                $('#modalModifier').css('display', 'block');
             });
 
             $('#closeModifier, #annulerModifier').on('click', function() {
@@ -299,7 +309,7 @@
             $('#apprentisTable tbody').on('click', '.btn-supprimer', function() {
                 $('#supprimerId').val($(this).data('id'));
                 $('#supprimerNomComplet').text($(this).data('nom') + ' ' + $(this).data('prenom'));
-                $('#modalSupprimer').css('display', 'flex');
+                $('#modalSupprimer').css('display', 'block');
             });
 
             $('#annulerSupprimer').on('click', function() {

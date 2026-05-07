@@ -241,12 +241,12 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.45);
             z-index: 1000;
-            align-items: center;
-            justify-content: center;
+            overflow-y: auto;
+            padding: 2rem 0;
         }
 
         .modal-overlay.active {
-            display: flex;
+            display: block;
         }
 
         .modal-box {
@@ -258,6 +258,7 @@
             box-shadow: 0 20px 60px rgba(255, 0, 0, 1);
             position: relative;
             font-family: 'Raleway', sans-serif;
+            margin: 0 auto;
         }
 
         .modal-close {
