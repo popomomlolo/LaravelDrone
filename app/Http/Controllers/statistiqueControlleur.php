@@ -20,9 +20,8 @@ class statistiqueControlleur extends Controller
     {
         $classes   = Classes::orderBy('libelle_classe')->get();
         $objectifs = Objectifs::orderBy('libelle_objectif')->get();
-        $apprentis = Apprentis::orderBy('nom')->get();
 
-        return view('statistique', compact('classes', 'objectifs', 'apprentis'));
+        return view('statistique', compact('classes', 'objectifs'));
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -34,18 +33,13 @@ class statistiqueControlleur extends Controller
         $idObjectif = request('id_objectif') ?: false;
 
         if ($idClasse) {
-            if ($idObjectif) {
-                $apprentis = $this->filtrerParClasseEtObjectif($idClasse, $idObjectif);
-            } else {
-                $apprentis = $this->filtrerParClasse($idClasse);
-            }
+            $apprentis = $idObjectif
+                ? $this->filtrerParClasseEtObjectif($idClasse, $idObjectif)
+                : $this->filtrerParClasse($idClasse);
         } else {
-            if ($idObjectif) {
-                $apprentis = $this->filtrerParObjectif($idObjectif);
-            } else {
-                // Cas "Toutes les classes" + "Tous les objectifs" : afficher tout
-                $apprentis = $this->filtrerTout();
-            }
+            $apprentis = $idObjectif
+                ? $this->filtrerParObjectif($idObjectif)
+                : $this->filtrerTout();
         }
 
         $result = $apprentis->map(fn($a) => $this->formaterApprentis($a));
@@ -76,7 +70,6 @@ class statistiqueControlleur extends Controller
         $idClasse   = request('id_classe')   ?: null;
         $idObjectif = request('id_objectif') ?: null;
 
-        // On accepte maintenant l'export même sans filtre (toutes les données)
         $html     = statistiqueExport::genererHtmlPdf($idClasse, $idObjectif);
         $fileName = 'resultats_' . now()->format('Ymd_His') . '.pdf';
 
@@ -87,12 +80,17 @@ class statistiqueControlleur extends Controller
         return $pdf->download($fileName);
     }
 
+    // ════════════════════════════════════════════════════════════════
+    // MÉTHODES PRIVÉES DE FILTRAGE
+    // Toutes chargent 'sessions.meteo' pour avoir les données météo
+    // ════════════════════════════════════════════════════════════════
+
     /**
      * Cas 2 — filtre par classe uniquement
      */
     private function filtrerParClasse($idClasse)
     {
-        return Apprentis::with(['classe', 'sessions.objectifs'])
+        return Apprentis::with(['classe', 'sessions.objectifs', 'sessions.meteo'])
             ->where('id_classe', $idClasse)
             ->orderBy('nom')
             ->get();
@@ -104,7 +102,7 @@ class statistiqueControlleur extends Controller
      */
     private function filtrerParObjectif($idObjectif)
     {
-        return Apprentis::with(['classe', 'sessions.objectifs'])
+        return Apprentis::with(['classe', 'sessions.objectifs', 'sessions.meteo'])
             ->whereHas('sessions.objectifs', function ($q) use ($idObjectif) {
                 $q->where('objectifs.id_objectif', $idObjectif);
             })
@@ -117,7 +115,7 @@ class statistiqueControlleur extends Controller
      */
     private function filtrerParClasseEtObjectif($idClasse, $idObjectif)
     {
-        return Apprentis::with(['classe', 'sessions.objectifs'])
+        return Apprentis::with(['classe', 'sessions.objectifs', 'sessions.meteo'])
             ->where('id_classe', $idClasse)
             ->whereHas('sessions.objectifs', function ($q) use ($idObjectif) {
                 $q->where('objectifs.id_objectif', $idObjectif);
@@ -128,7 +126,6 @@ class statistiqueControlleur extends Controller
 
     /**
      * Cas 5 — aucun filtre (toutes les classes + tous les objectifs)
-     * Retourne tous les apprentis avec toutes leurs sessions
      */
     private function filtrerTout()
     {
@@ -137,18 +134,30 @@ class statistiqueControlleur extends Controller
             ->get();
     }
 
+    // ════════════════════════════════════════════════════════════════
+    // FORMATAGE JSON
+    // ════════════════════════════════════════════════════════════════
+
     /**
-     * Formate un apprenti en tableau pour la réponse JSON
+     * Formate un apprenti en tableau pour la réponse JSON.
+     * Les champs météo (jour, ciel, vent_norme) viennent de conditions_meteo
+     * via la relation session->meteo.
      */
     private function formaterApprentis($apprenti): array
     {
         $sessions = $apprenti->sessions->map(fn($session) => [
             'id'                 => $session->id_session,
             'date'               => \Carbon\Carbon::parse($session->date_heure)->format('d/m/Y H:i'),
-            'type_drone'         => $session->type_drone,
-            'type_environnement' => $session->type_environnement,
-            'jour'               => $session->meteo?->jour,
-            'ciel'               => $session->meteo?->ciel,
+            'type_drone'         => (bool) $session->type_drone,
+            'type_environnement' => (bool) $session->type_environnement,
+            'duree_max'          => $session->duree_max,
+
+            // ── Météo (depuis conditions_meteo) ──────────────────
+            'jour'               => $session->meteo ? (bool) $session->meteo->jour       : null,
+            'ciel'               => $session->meteo ?        $session->meteo->ciel        : null,
+            'vent_norme'         => $session->meteo ?        $session->meteo->vent_norme  : null,
+
+            // ── Objectifs (depuis validations) ───────────────────
             'objectifs'          => $session->objectifs->map(fn($obj) => [
                 'libelle'              => $obj->libelle_objectif,
                 'reussi'               => (bool) $obj->pivot->reussi,

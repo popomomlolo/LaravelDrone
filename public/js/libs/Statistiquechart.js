@@ -1,7 +1,4 @@
-/**
- * Statistiquechart.js
- * Polar bar chart Highcharts — Réussite par objectif.
- */
+/*
 function initChart(apprentis, objectifFiltre = null) {
 
     if (!apprentis || apprentis.length === 0 || !document.getElementById('chartContainer')) {
@@ -117,6 +114,148 @@ function initChart(apprentis, objectifFiltre = null) {
             { name: 'Échoué', data: dataEchoue, color: '#ef4444' }
         ],
         legend: { enabled: true, align: 'center', verticalAlign: 'bottom' },
+        credits: { enabled: false }
+    });
+}*/
+
+
+
+
+/**
+ * Statistiquechart.js
+ */
+/**
+ * Statistiquechart.js
+ * Bar chart Highcharts — Réussite par objectif (colonnes droites, stacking %).
+ * - Fond totalement transparent (hérite du site)
+ * - Échoué (rouge) EN HAUT
+ * - Réussi (vert) AU MILIEU
+ * - Non tenté (gris) EN BAS
+ */
+function initChart(apprentis, objectifFiltre = null) {
+
+    if (!apprentis || apprentis.length === 0 || !document.getElementById('chartContainer')) {
+        return;
+    }
+
+    const objectifsMap = {};
+
+    apprentis.forEach(function (apprenti) {
+        const reussisParObjectif = {};
+
+        apprenti.sessions.forEach(function (session) {
+            session.objectifs.forEach(function (obj) {
+                if (objectifFiltre && obj.libelle !== objectifFiltre) {
+                    return;
+                }
+                if (!(obj.libelle in reussisParObjectif)) {
+                    reussisParObjectif[obj.libelle] = false;
+                }
+                if (obj.reussi) {
+                    reussisParObjectif[obj.libelle] = true;
+                }
+            });
+        });
+
+        // Chaque objectif tenté par cet apprenti est comptabilisé
+        Object.keys(reussisParObjectif).forEach(function (libelle) {
+            if (!objectifsMap[libelle]) {
+                objectifsMap[libelle] = { reussi: 0, echoue: 0, nonTente: 0 };
+            }
+            if (reussisParObjectif[libelle]) {
+                objectifsMap[libelle].reussi++;
+            } else {
+                objectifsMap[libelle].echoue++;
+            }
+        });
+    });
+
+    const total      = apprentis.length;
+    const categories = Object.keys(objectifsMap);
+
+    // nonTente = apprentis n'ayant aucune session avec cet objectif
+    categories.forEach(function (libelle) {
+        const tentes = objectifsMap[libelle].reussi + objectifsMap[libelle].echoue;
+        objectifsMap[libelle].nonTente = Math.max(0, total - tentes);
+    });
+
+    const dataReussi   = categories.map(function (k) { return objectifsMap[k].reussi;    });
+    const dataEchoue   = categories.map(function (k) { return objectifsMap[k].echoue;    });
+    const dataNonTente = categories.map(function (k) { return objectifsMap[k].nonTente;  });
+
+    console.log('Objectifs  :', categories);
+    console.log('Réussis    :', dataReussi);
+    console.log('Échoués    :', dataEchoue);
+    console.log('Non tentés :', dataNonTente);
+
+    const titre = objectifFiltre
+        ? 'Réussite : ' + objectifFiltre
+        : 'Réussite par objectif';
+
+    const sousTitre = objectifFiltre
+        ? "Réussi / Échoué / Non tenté pour cet objectif (" + total + ' apprentis)'
+        : "Réussi / Échoué / Non tenté par objectif (" + total + ' apprentis)';
+
+    Highcharts.chart('chartContainer', {
+        chart: {
+            type               : 'column',
+            backgroundColor    : 'transparent',
+            plotBackgroundColor: 'transparent',
+            style              : { fontFamily: 'Raleway, sans-serif' }
+        },
+        navigation: {
+            buttonOptions: {
+                enabled: false
+            }
+        }, 
+        title: {
+            text : titre,
+            style: { fontWeight: '600', fontSize: '1rem' }
+        },
+        subtitle: {
+            text : sousTitre,
+            style: { fontSize: '13px' }
+        },
+        xAxis: {
+            categories: categories,
+            labels    : { style: { fontSize: '13px', fontWeight: 'bold' } }
+        },
+        yAxis: {
+            min           : 0,
+            title         : { text: 'Pourcentage (%)' },
+            reversedStacks: false
+        },
+        tooltip: {
+            shared   : true,
+            formatter: function () {
+                let s = '<b>' + this.x + '</b><br/>';
+                // Ordre d'affichage inversé = cohérent avec l'ordre visuel (haut → bas)
+                this.points.slice().reverse().forEach(function (point) {
+                    s += '<span style="color:' + point.color + '">●</span> '
+                        + point.series.name + ' : <b>' + point.y + '</b> ('
+                        + Highcharts.numberFormat(point.percentage, 0) + '%)'
+                        + ' / ' + total + ' apprentis<br/>';
+                });
+                return s;
+            }
+        },
+        plotOptions: {
+            column: {
+                stacking   : 'percent',
+                borderWidth: 0,
+                dataLabels : {
+                    enabled: true,
+                    format : '{point.percentage:.0f}%',
+                    style  : { fontSize: '11px', fontWeight: 'bold', textOutline: 'none' }
+                }
+            }
+        },
+        series: [
+            { name: 'Réussi',     data: dataReussi,   color: '#22c55e' },
+            { name: 'Échoué',     data: dataEchoue,   color: '#ef4444' },            
+            { name: 'Non tenté',  data: dataNonTente, color: '#9ca3af' }
+        ],
+        legend : { enabled: true, align: 'center', verticalAlign: 'bottom' },
         credits: { enabled: false }
     });
 }

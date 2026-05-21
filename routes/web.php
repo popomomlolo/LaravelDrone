@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     // ── Apprentis ──
     Route::get('/apprentis',                [ApprentisController::class, 'index'])->name('apprentis.index');
     Route::post('/apprentis/supprimer',     [ApprentisController::class, 'destroy']);
+    //Route::get('/apprentis/showform',     [ApprentisController::class, 'showform']);
     Route::post('/apprentis/modifier',      [ApprentisController::class, 'editForm']);
     Route::post('/apprentis/update',        [ApprentisController::class, 'update']);
     Route::post('/apprentis/ajouter',       [ApprentisController::class, 'store']);
@@ -39,7 +40,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/statistique/csv',     [statistiqueControlleur::class, 'exportCsv'])->name('statistique.csv');
     Route::get('/statistique/pdf',     [statistiqueControlleur::class, 'exportPdf'])->name('statistique.pdf');
 
+    /*
     Route::get('/testStat',         [statistiqueControlleur::class, 'index'])->name('testStat.index');
     Route::get('/testStat/filtrer', [statistiqueControlleur::class, 'filtrer'])->name('testStat.filtrer');
     Route::get('/testStat/csv',     [statistiqueControlleur::class, 'exportCsv'])->name('testStat.csv');
     Route::get('/testStat/pdf',     [statistiqueControlleur::class, 'exportPdf'])->name('testStat.pdf');
+*/

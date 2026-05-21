@@ -14,7 +14,6 @@ class Formateurs extends Authenticatable
     protected $primaryKey = 'id_formateur';
     public $incrementing = true;
     protected $keyType = 'int';
-
     protected $fillable = ['login', 'mot_de_passe', 'nom', 'prenom'];
     protected $hidden = ['mot_de_passe'];
     public $timestamps = false;

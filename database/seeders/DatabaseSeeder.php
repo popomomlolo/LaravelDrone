@@ -63,6 +63,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ── 4. OBJECTIFS ─────────────────────────────────────────────
+        // id_objectif : 1=Cerceaux, 2=Atterrissage, 3=Positionnement,
+        //               4=Maintien d'Altitude, 5=Tours
         DB::table('objectifs')->insert([
             ['libelle_objectif' => 'Cerceaux',            'est_automatique' => true],
             ['libelle_objectif' => 'Atterrissage',        'est_automatique' => true],
@@ -72,75 +74,244 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ── 5. METEO ─────────────────────────────────────────────────
-        // jour : true = jour, false = nuit
-        // ciel : 0=dégagé, 1=nuageux, 2=couvert, 3=pluvieux
-        // vent_x, vent_y, vent_z : composantes du vecteur vent (direction)
-        // vent_norme : intensité du vent en m/s
         DB::table('conditions_meteo')->insert([
-            // 1 — Jour ensoleillé, vent faible du nord
             ['jour' => true,  'ciel' => 0, 'vent_x' => 0.0, 'vent_y' => 2.0, 'vent_z' => 0.0, 'vent_norme' => 2.0],
-            // 2 — Jour nuageux, vent modéré
             ['jour' => true,  'ciel' => 1, 'vent_x' => 1.5, 'vent_y' => 1.5, 'vent_z' => 0.0, 'vent_norme' => 4.2],
-            // 3 — Jour pluvieux, conditions difficiles
             ['jour' => true,  'ciel' => 3, 'vent_x' => 5.0, 'vent_y' => 3.0, 'vent_z' => 0.5, 'vent_norme' => 8.5],
-            // 4 — Intérieur, pas de vent (jour)
             ['jour' => true,  'ciel' => 0, 'vent_x' => 0.0, 'vent_y' => 0.0, 'vent_z' => 0.0, 'vent_norme' => 0.0],
-            // 5 — Nuit dégagée, vent faible
             ['jour' => false, 'ciel' => 0, 'vent_x' => 0.0, 'vent_y' => 0.5, 'vent_z' => 0.0, 'vent_norme' => 0.5],
-            
         ]);
 
-        // ── 6 & 7. SESSIONS + VALIDER ────────────────────────────────
-        // type_drone : true = drone pro, false = drone débutant (selon migration boolean)
-        $formateurs  = [1, 2]; // id_formateur (auto-incrémentés)
-        $durees      = [20, 30, 45, 60];
-        $quantitesMax = [1 => 3, 2 => 2, 3 => 4, 4 => 1, 5 => 5];
-
+        // ── 6 & 7. SESSIONS + VALIDATIONS ───────────────────────────
+        //
+        // Le plan de sessions définit, pour chaque session d'un apprenti,
+        // quels objectifs sont TENTÉS et leur résultat (true=réussi, false=échoué).
+        //
+        // Un objectif ABSENT du tableau de la session = NON TENTÉ.
+        // Cela permet d'avoir les 3 cas dans le graphique :
+        //   🟢 Réussi   — objectif tenté et validé
+        //   🔴 Échoué   — objectif tenté mais raté
+        //   ⬜ Non tenté — objectif jamais présent dans les sessions de l'apprenti
+        //
+        // Structure : id_apprenti => [ session1 => [id_objectif => reussi, ...], ... ]
+        //
+        // Exemples de "non tentés" voulus :
+        //   - Apprentis 1,2,8,16 : "Tours" (5) jamais tenté
+        //   - Apprentis 2,8      : "Maintien d'Altitude" (4) jamais tenté
+        //   - Apprentis 3,5      : "Tours" (5) jamais tenté
+        //   - Apprentis 13,16    : débutants qui n'ont pas encore tous les objectifs
+        // ─────────────────────────────────────────────────────────────
         $planSessions = [
-            // ── Classe 1 — BTS 1ère année (débutants) ──
-            1  => [[false, false, true, false, false], [true, false, true, false, false], [true, true, true, false, true]],
-            2  => [[false, false, false, false, false], [true, false, true, false, false]],
-            3  => [[true, false, false, true, false], [true, true, false, true, false], [true, true, true, true, false]],
-            4  => [[true, true, true, false, false], [true, true, true, true, false], [true, true, true, true, true]],
-            5  => [[false, false, false, false, false], [true, false, true, false, false], [true, true, true, false, false], [true, true, true, true, false]],
-            6  => [[true, true, true, true, false], [true, true, true, true, true]],
-            7  => [[true, false, false, false, false], [true, true, false, false, true], [true, true, true, false, true]],
-            8  => [[false, false, false, true, false], [true, false, false, true, false], [true, true, false, true, false]],
-            9  => [[true, true, false, false, false], [true, true, true, false, true], [true, true, true, true, true]],
-            10 => [[true, false, false, true, false], [true, true, false, true, true]],
 
-            // ── Classe 2 — BTS 2ème année (intermédiaires) ──
-            11 => [[true, false, true, true, false], [true, true, true, true, false], [true, true, true, true, true]],
-            12 => [[true, true, true, true, false], [true, true, true, true, true]],
-            13 => [[false, true, false, false, false], [true, true, false, false, true], [true, true, true, false, true], [true, true, true, true, true]],
-            14 => [[true, true, true, false, false], [true, true, true, true, false]],
-            15 => [[true, false, false, true, false], [true, true, false, true, true], [true, true, true, true, true]],
-            16 => [[false, false, false, false, false], [false, true, false, true, false], [true, true, false, true, false], [true, true, true, true, false]],
-            17 => [[true, true, true, true, false], [true, true, true, true, true]],
-            18 => [[true, false, true, true, false], [true, true, true, true, true]],
-            19 => [[false, true, true, false, false], [true, true, true, false, true], [true, true, true, true, true]],
-            20 => [[true, true, true, true, true]],
+            // ══ Classe 1 — BTS 1ère année (débutants) ══════════════
 
-            // ── Classe 3 — Licence Pro (avancés) ──
-            21 => [[true, true, true, true, false], [true, true, true, true, true]],
-            22 => [[true, true, true, true, true]],
-            23 => [[true, false, true, true, false], [true, true, true, true, true]],
-            24 => [[true, true, true, true, false], [true, true, true, true, true]],
-            25 => [[true, true, true, false, true], [true, true, true, true, true]],
-            26 => [[true, true, true, true, true]],
-            27 => [[true, false, true, true, false], [true, true, true, true, false], [true, true, true, true, true]],
-            28 => [[true, true, true, true, false], [true, true, true, true, true]],
-            29 => [[true, true, true, true, true]],
-            30 => [[true, true, false, true, true], [true, true, true, true, true]],
+            // Apprenti 1 — Jean Dupont : ne tente jamais "Tours" (5)
+            1 => [
+                [1 => false, 2 => false, 3 => true],                    // session 1 : objectifs 1,2,3 seulement
+                [1 => true,  2 => false, 3 => true,  4 => false],       // session 2 : objectifs 1,2,3,4
+                [1 => true,  2 => true,  3 => true,  4 => false],       // session 3 : objectifs 1,2,3,4
+            ],
+
+            // Apprenti 2 — Emma Martin : ne tente jamais "Maintien d'Altitude" (4) ni "Tours" (5)
+            2 => [
+                [1 => false, 2 => false, 3 => false],                   // session 1 : objectifs 1,2,3
+                [1 => true,  2 => false, 3 => true],                    // session 2 : objectifs 1,2,3
+            ],
+
+            // Apprenti 3 — Théo Leroy : ne tente jamais "Tours" (5)
+            3 => [
+                [1 => true,  2 => false, 3 => false, 4 => true],
+                [1 => true,  2 => true,  3 => false, 4 => true],
+                [1 => true,  2 => true,  3 => true,  4 => true],
+            ],
+
+            // Apprenti 4 — Inès Fontaine : tente tous les objectifs
+            4 => [
+                [1 => true,  2 => true,  3 => true,  4 => false, 5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 5 — Maxime Garnier : ne tente jamais "Tours" (5)
+            5 => [
+                [1 => false, 2 => false, 3 => false, 4 => false],
+                [1 => true,  2 => false, 3 => true,  4 => false],
+                [1 => true,  2 => true,  3 => true,  4 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true],
+            ],
+
+            // Apprenti 6 — Lucie Chevalier : tente tous les objectifs
+            6 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 7 — Antoine Morin : ne tente jamais "Positionnement" (3)
+            7 => [
+                [1 => true,  2 => false, 3 => false],                   // 3 tenté et échoué ici
+                [1 => true,  2 => true,  4 => false, 5 => true],        // 3 absent = non tenté cette session
+                [1 => true,  2 => true,  4 => false, 5 => true],        // 3 toujours absent
+            ],
+
+            // Apprenti 8 — Manon Girard : ne tente jamais "Maintien d'Altitude" (4) ni "Tours" (5)
+            8 => [
+                [1 => false, 2 => false, 3 => false],
+                [1 => true,  2 => false, 3 => false],
+                [1 => true,  2 => true,  3 => false],
+            ],
+
+            // Apprenti 9 — Baptiste Rousseau : tente tous les objectifs
+            9 => [
+                [1 => true,  2 => true,  3 => false, 4 => false, 5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => false, 5 => true],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 10 — Camille Faure : ne tente jamais "Tours" (5)
+            10 => [
+                [1 => true,  2 => false, 3 => false, 4 => true],
+                [1 => true,  2 => true,  3 => false, 4 => true],
+            ],
+
+            // ══ Classe 2 — BTS 2ème année (intermédiaires) ══════════
+
+            // Apprenti 11 — Lucas Bernard : tente tous les objectifs
+            11 => [
+                [1 => true,  2 => false, 3 => true,  4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 12 — Chloé Petit : tente tous les objectifs
+            12 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 13 — Romain Legrand : ne tente jamais "Cerceaux" (1)
+            13 => [
+                [2 => false, 3 => false, 4 => false, 5 => false],       // 1 absent
+                [2 => true,  3 => false, 4 => false, 5 => true],        // 1 absent
+                [2 => true,  3 => true,  4 => false, 5 => true],        // 1 absent
+                [2 => true,  3 => true,  4 => true,  5 => true],        // 1 absent
+            ],
+
+            // Apprenti 14 — Jade Marchand : ne tente jamais "Tours" (5)
+            14 => [
+                [1 => true,  2 => true,  3 => true,  4 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true],
+            ],
+
+            // Apprenti 15 — Quentin Lemaire : tente tous les objectifs
+            15 => [
+                [1 => true,  2 => false, 3 => false, 4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => false, 4 => true,  5 => true],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 16 — Océane Dupuis : ne tente jamais "Cerceaux" (1) ni "Tours" (5)
+            16 => [
+                [2 => false, 3 => false, 4 => false],
+                [2 => false, 3 => false, 4 => true],
+                [2 => true,  3 => false, 4 => true],
+                [2 => true,  3 => true,  4 => true],
+            ],
+
+            // Apprenti 17 — Florian Renard : tente tous les objectifs
+            17 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 18 — Pauline Blanc : ne tente jamais "Atterrissage" (2)
+            18 => [
+                [1 => true,  3 => false, 4 => true,  5 => false],       // 2 absent
+                [1 => true,  3 => true,  4 => true,  5 => true],        // 2 absent
+            ],
+
+            // Apprenti 19 — Alexis Guerin : tente tous les objectifs
+            19 => [
+                [1 => false, 2 => true,  3 => true,  4 => false, 5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => false, 5 => true],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 20 — Sarah Millet : tente tous les objectifs (déjà avancée)
+            20 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // ══ Classe 3 — Licence Pro (avancés) ════════════════════
+
+            // Apprenti 21 — Hugo Robert : tente tous les objectifs
+            21 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 22 — Léa Moreau : tente tous les objectifs
+            22 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 23 — Nicolas Simon : ne tente jamais "Atterrissage" (2)
+            23 => [
+                [1 => true,  3 => false, 4 => true,  5 => false],       // 2 absent
+                [1 => true,  3 => true,  4 => true,  5 => true],        // 2 absent
+            ],
+
+            // Apprenti 24 — Anaïs Laurent : tente tous les objectifs
+            24 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 25 — Valentin Michel : tente tous les objectifs
+            25 => [
+                [1 => true,  2 => true,  3 => true,  4 => false, 5 => true],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 26 — Charlotte Lefebvre : tente tous les objectifs
+            26 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 27 — Julien Lefevre : ne tente jamais "Atterrissage" (2)
+            27 => [
+                [1 => true,  3 => false, 4 => true,  5 => false],       // 2 absent
+                [1 => true,  3 => true,  4 => true,  5 => false],       // 2 absent
+                [1 => true,  3 => true,  4 => true,  5 => true],        // 2 absent
+            ],
+
+            // Apprenti 28 — Marine Roux : tente tous les objectifs
+            28 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => false],
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 29 — Kevin David : tente tous les objectifs
+            29 => [
+                [1 => true,  2 => true,  3 => true,  4 => true,  5 => true],
+            ],
+
+            // Apprenti 30 — Elise Bertrand : ne tente jamais "Positionnement" (3)
+            30 => [
+                [1 => true,  2 => true,  4 => true,  5 => false],       // 3 absent
+                [1 => true,  2 => true,  4 => true,  5 => true],        // 3 absent
+            ],
         ];
 
-        $sessionId = 1;
-        $sessions  = [];
-        $validations = [];
-        $dateBase  = strtotime('2025-01-05');
+        // ── Quantités max par objectif ───────────────────────────────
+        $quantitesMax = [1 => 3, 2 => 2, 3 => 4, 4 => 1, 5 => 5];
+        $formateurs   = [1, 2];
+        $durees       = [20, 30, 45, 60];
+        $dateBase     = strtotime('2025-01-05');
 
-        // NOTE: date_heure est spécifiée ici pour avoir des données de test variées
-        // En production, on peut omettre ce champ pour utiliser CURRENT_TIMESTAMP automatiquement
+        $sessionId   = 1;
+        $sessions    = [];
+        $validations = [];
+
         foreach ($planSessions as $apprentiId => $toutesLesSessions) {
             $dateOffset = 0;
 
@@ -149,26 +320,24 @@ class DatabaseSeeder extends Seeder
                 $date  = date('Y-m-d', $dateBase + ($apprentiId * 3 + $dateOffset) * 86400);
                 $heure = str_pad(rand(8, 16), 2, '0', STR_PAD_LEFT) . ':00:00';
 
-                // id_meteo entre 1 et 6 en cycle
-                $idMeteo = (($sessionId - 1) % 6) + 1;
-
-                // true = extérieur (météo 1,2,3,5,6), false = intérieur (météo 4)
+                $idMeteo = (($sessionId - 1) % 5) + 1;
                 $typeEnv = ($idMeteo !== 4);
 
                 $sessions[] = [
                     'date_heure'         => $date . ' ' . $heure,
                     'type_environnement' => $typeEnv,
-                    'type_drone'         => ($sessionId % 2 === 0), // true/false alternés
+                    'type_drone'         => ($sessionId % 2 === 0),
                     'duree_max'          => $durees[$sessionId % 4],
                     'id_meteo'           => $idMeteo,
                     'id_formateur'       => $formateurs[$sessionId % 2],
                     'id_apprenti'        => $apprentiId,
                 ];
 
-                foreach ($objResultats as $objIndex => $reussi) {
-                    $objId = $objIndex + 1;
-                    $qa    = $quantitesMax[$objId];
-                    $qr    = $reussi ? $qa : rand(0, $qa - 1);
+                // Seuls les objectifs PRÉSENTS dans le tableau sont insérés
+                // → les objectifs absents = non tentés (aucune ligne dans validations)
+                foreach ($objResultats as $objId => $reussi) {
+                    $qa = $quantitesMax[$objId];
+                    $qr = $reussi ? $qa : rand(0, $qa - 1);
 
                     $validations[] = [
                         'id_session'           => $sessionId,
