@@ -3,353 +3,309 @@
 @section('title', 'Liste des apprentis')
 
 @section('content')
-    <h1>Liste des apprentis</h1>
 
+    <div class="page-title">Apprentis</div>
+    <p class="page-sub">Gérez la liste des apprentis — ajoutez, modifiez ou supprimez</p>
+
+    {{-- ════ Message succès ════ --}}
     @if (session('success'))
-        <div style="color:green;margin-bottom:1rem;">{{ session('success') }}</div>
+        <div class="alert-app alert-app-success mb-3">{{ session('success') }}</div>
     @endif
 
-    {{-- Boutons formulaires --}}
-    <div style="margin-bottom:1.5rem;">
-        <button
-            id="btnAjouter"
-            type="button"
-            style="background:#28a745;color:#fff;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;margin-right:0.5rem;"
-        >+ Ajouter un apprenti</button>
-        <button
-            id="btnImport"
-            type="button"
-            style="background:#007bff;color:#fff;border:none;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;"
-        >Importer CSV</button>
+    {{-- ════ Boutons toggle ════ --}}
+    <div class="d-flex gap-2 mb-3">
+        <button id="btnAjouter" type="button" class="btn-app btn-app-success">+ Ajouter un apprenti</button>
+        <button id="btnImport"  type="button" class="btn-app btn-app-info">⬆ Importer CSV</button>
     </div>
 
-    {{-- Formulaire d'ajout --}}
-    <div
-        id="formAjouter"
-        style="display:none;margin-bottom:1.5rem;padding:1rem;border:1px solid #ddd;border-radius:8px;max-width:400px;"
-    >
-        <h3>Ajouter un apprenti</h3>
-        <form
-            action="/apprentis/ajouter"
-            method="POST"
-        >
+    {{-- ════ Formulaire Ajouter ════ --}}
+    <div id="formAjouter" class="card-dark form-panel mb-3" style="display:none;">
+        <div class="form-panel-title">Ajouter un apprenti</div>
+        <form action="/apprentis/ajouter" method="POST">
             @csrf
-            <div style="margin-bottom:0.5rem;"><label>Nom :</label><input
-                    type="text"
-                    name="nom"
-                    placeholder="Nom"
-                    required
-                    style="width:100%;padding:0.3rem;"
-                ></div>
-            <div style="margin-bottom:0.5rem;"><label>Prénom :</label><input
-                    type="text"
-                    name="prenom"
-                    placeholder="Prénom"
-                    required
-                    style="width:100%;padding:0.3rem;"
-                ></div>
-            <div style="margin-bottom:0.5rem;">
-                <label>Classe :</label>
-                <select
-                    name="id_classe"
-                    required
-                    style="width:100%;padding:0.3rem;"
-                >
+            <div class="mb-3">
+                <label class="form-label-dark">Nom</label>
+                <input type="text" name="nom" placeholder="Nom" required class="form-control-dark">
+            </div>
+            <div class="mb-3">
+                <label class="form-label-dark">Prénom</label>
+                <input type="text" name="prenom" placeholder="Prénom" required class="form-control-dark">
+            </div>
+            <div class="mb-3">
+                <label class="form-label-dark">Classe</label>
+                <select name="id_classe" required class="form-select-dark">
                     @foreach ($classes as $id => $libelle)
                         <option value="{{ $id }}">{{ $libelle }}</option>
                     @endforeach
                 </select>
             </div>
-            <button
-                type="submit"
-                style="background:#28a745;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;"
-            >Ajouter</button>
+            <div class="d-flex gap-2">
+                <button type="submit"           class="btn-app btn-app-success">✓ Ajouter</button>
+                <button type="button" id="annulerAjouter" class="btn-app btn-app-danger">✕ Annuler</button>
+            </div>
         </form>
     </div>
 
-    {{-- Import CSV --}}
-    <div
-        id="formImport"
-        style="display:none;margin-bottom:2rem;padding:1rem;border:1px solid #ddd;border-radius:8px;max-width:400px;"
-    >
-        <h3>Importer plusieurs apprentis (CSV)</h3>
-        <p style="font-size:0.85rem;color:#666;">Format : <code>nom,prenom,libelle_classe</code> (avec entête)</p>
-        <form
-            action="/apprentis/import-csv"
-            method="POST"
-            enctype="multipart/form-data"
-        >
+    {{-- ════ Formulaire Import CSV ════ --}}
+    <div id="formImport" class="card-dark form-panel mb-3" style="display:none;">
+        <div class="form-panel-title">Importer plusieurs apprentis</div>
+        <p class="form-panel-hint">Format : <code>nom,prenom,libelle_classe</code> (avec en-tête)</p>
+        <form action="/apprentis/import-csv" method="POST" enctype="multipart/form-data">
             @csrf
-            <input
-                type="file"
-                name="csv_file"
-                accept=".csv,.txt"
-                required
-            >
-            <button
-                type="submit"
-                style="background:#007bff;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;margin-top:0.5rem;"
-            >Importer</button>
+            <div class="mb-3">
+                <input type="file" name="csv_file" accept=".csv,.txt" required class="form-file-dark">
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit"          class="btn-app btn-app-success">⬆ Importer</button>
+                <button type="button" id="annulerImport" class="btn-app btn-app-danger">✕ Annuler</button>
+            </div>
         </form>
     </div>
 
-    {{-- Tableau --}}
-    <table
-        id="apprentisTable"
-        class="display"
-        style="width:100%"
-    >
-        <thead>
-            <tr>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>Classe</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    {{-- Modale Modifier --}}
-    <div
-        id="modalModifier"
-        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;padding:2rem 0;"
-    >
-        <div
-            style="background:#1a1a2e;color:#e2e8f0;padding:2rem;border-radius:12px;width:420px;max-width:90vw;position:relative;border:1px solid #2a2f3d;margin:0 auto;">
-            <button
-                id="closeModifier"
-                style="position:absolute;top:0.75rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#aaa;"
-            >&times;</button>
-            <h3 style="margin-bottom:1.5rem;">✏️ Modifier l'apprenti</h3>
-            <form
-                id="formModifierModal"
-                action="/apprentis/update"
-                method="POST"
-            >
-                @csrf
-                <input
-                    type="hidden"
-                    name="apprenti_id"
-                    id="modifierId"
-                >
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block;margin-bottom:0.25rem;">Nom :</label>
-                    <input
-                        type="text"
-                        name="nom"
-                        id="modifierNom"
-                        required
-                        style="width:100%;padding:0.5rem;background:#0d0f14;border:1px solid #2a2f3d;border-radius:6px;color:#e2e8f0;"
-                    >
-                </div>
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block;margin-bottom:0.25rem;">Prénom :</label>
-                    <input
-                        type="text"
-                        name="prenom"
-                        id="modifierPrenom"
-                        required
-                        style="width:100%;padding:0.5rem;background:#0d0f14;border:1px solid #2a2f3d;border-radius:6px;color:#e2e8f0;"
-                    >
-                </div>
-                <div style="margin-bottom:1rem;">
-                    <label style="display:block;margin-bottom:0.25rem;">Classe :</label>
-                    <select
-                        name="id_classe"
-                        id="modifierClasse"
-                        required
-                        style="width:100%;padding:0.5rem;background:#0d0f14;border:1px solid #2a2f3d;border-radius:6px;color:#e2e8f0;"
-                    >
-                        @foreach ($classes as $id => $libelle)
-                            <option value="{{ $id }}">{{ $libelle }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div style="display:flex;gap:0.75rem;">
-                    <button
-                        type="submit"
-                        style="background:#007bff;color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:600;"
-                    >Enregistrer</button>
-                    <button
-                        type="button"
-                        id="annulerModifier"
-                        style="background:#444;color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:6px;cursor:pointer;"
-                    >Annuler</button>
-                </div>
-            </form>
-        </div>
+    {{-- ════ Tableau DataTable AJAX ════ --}}
+    <div class="card-dark">
+        <table id="apprentisTable" class="table dataTable w-100">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Classe</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 
-    {{-- Modale Confirmation Suppression --}}
-    <div
-        id="modalSupprimer"
-        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;padding:2rem 0;"
-    >
-        <div
-            style="background:#1a1a2e;color:#e2e8f0;padding:2rem;border-radius:12px;width:380px;max-width:90vw;position:relative;border:1px solid #2a2f3d;text-align:center;margin:0 auto;">
-            <div style="font-size:3rem;margin-bottom:0.5rem;">⚠️</div>
-            <h3 style="margin-bottom:0.5rem;">Confirmer la suppression</h3>
-            <p style="color:#aaa;margin-bottom:1.5rem;">Voulez-vous vraiment supprimer <strong
-                    id="supprimerNomComplet"></strong> ?<br>Cette action est irréversible.</p>
-            <input
-                type="hidden"
-                id="supprimerId"
-            >
-            <div style="display:flex;gap:0.75rem;justify-content:center;">
-                <button
-                    id="btnConfirmerSupprimer"
-                    style="background:#dc3545;color:#fff;border:none;padding:0.5rem 1.5rem;border-radius:6px;cursor:pointer;font-weight:600;"
-                >Supprimer</button>
-                <button
-                    type="button"
-                    id="annulerSupprimer"
-                    style="background:#444;color:#fff;border:none;padding:0.5rem 1.5rem;border-radius:6px;cursor:pointer;"
-                >Annuler</button>
+    {{-- ════ Modale Modifier ════ --}}
+    <div class="modal-overlay" id="modalModifier">
+        <div class="modal-box modal-box-sm">
+            <div class="modal-header-bar">
+                <span class="modal-nom">✏️ Modifier l'apprenti</span>
+                <button id="closeModifier" class="btn-app btn-app-danger">✕ Fermer</button>
+            </div>
+            <div class="modal-scroll-zone">
+                <form id="formModifierModal" action="/apprentis/update" method="POST">
+                    @csrf
+                    <input type="hidden" name="apprenti_id" id="modifierId">
+                    <div class="mb-3">
+                        <label class="form-label-dark">Nom</label>
+                        <input type="text" name="nom" id="modifierNom" required class="form-control-dark">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-dark">Prénom</label>
+                        <input type="text" name="prenom" id="modifierPrenom" required class="form-control-dark">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-dark">Classe</label>
+                        <select name="id_classe" id="modifierClasse" required class="form-select-dark">
+                            @foreach ($classes as $id => $libelle)
+                                <option value="{{ $id }}">{{ $libelle }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit"               class="btn-app btn-app-success">✓ Enregistrer</button>
+                        <button type="button" id="annulerModifier" class="btn-app btn-app-danger">✕ Annuler</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link
-        rel="stylesheet"
-        href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
-    >
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    {{-- ════ Modale Confirmation Suppression ════ --}}
+    <div class="modal-overlay" id="modalSupprimer">
+        <div class="modal-box modal-box-sm" style="text-align:center;">
+            <div class="modal-header-bar">
+                <span class="modal-nom">⚠️ Confirmer la suppression</span>
+                <button id="closeSupprimer" class="btn-app btn-app-secondary">✕ Fermer</button>
+            </div>
+            <div class="modal-scroll-zone">
+                <p class="modal-confirm-text">
+                    Voulez-vous vraiment supprimer<br>
+                    <strong id="supprimerNomComplet" class="modal-confirm-name"></strong> ?
+                </p>
+                <p class="modal-confirm-warning">Cette action est irréversible.</p>
+                <input type="hidden" id="supprimerId">
+                <div class="d-flex gap-2 justify-content-center mt-3">
+                    <button id="btnConfirmerSupprimer" class="btn-app btn-app-danger">🗑️ Supprimer</button>
+                    <button id="annulerSupprimer"      class="btn-app btn-app-secondary">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        var csrfToken = '{{ csrf_token() }}';
+@endsection
 
-        $(document).ready(function() {
-            var table = $('#apprentisTable').DataTable({
-                ajax: {
-                    url: '/api/apprentis',
-                    dataSrc: function(json) {
-                        // ✅ Console.log pour vérifier la structure JSON
-                        console.log('=== Structure JSON retournée par /api/apprentis ===');
-                        console.log('Nombre d\'apprentis:', json.length);
-                        if (json.length > 0) {
-                            console.log('Structure du premier apprenti:', json[0]);
-                            console.log('Champs disponibles:', Object.keys(json[0]));
-                        }
-                        console.log('Données complètes:', json);
-                        return json;
+@push('scripts')
+<script>
+    var csrfToken = '{{ csrf_token() }}';
+
+    $(document).ready(function () {
+
+        // ── DataTable AJAX ───────────────────────────────────────
+        var table = $('#apprentisTable').DataTable({
+            ajax: {
+                url    : '/api/apprentis',
+                dataSrc: function (json) {
+                    console.group('📥 GET /api/apprentis');
+                    console.log('Nombre d\'apprentis :', json.length);
+                    if (json.length > 0) {
+                        console.log('Structure du 1er apprenti :', json[0]);
+                        console.log('Champs disponibles        :', Object.keys(json[0]));
+                    }
+                    console.log('Données complètes :', json);
+                    console.groupEnd();
+                    return json;
+                },
+                error: function (xhr) {
+                    console.group('❌ ERREUR GET /api/apprentis');
+                    console.error('Status :', xhr.status);
+                    console.error('Réponse:', xhr.responseText);
+                    console.groupEnd();
+                }
+            },
+            columns: [
+                { data: 'nom' },
+                { data: 'prenom' },
+                {
+                    data  : 'libelle_classe',
+                    render: function (data) {
+                        return '<span class="badge-app badge-app-accent">' + data + '</span>';
                     }
                 },
-                columns: [{
-                        data: 'nom'
-                    },
-                    {
-                        data: 'prenom'
-                    },
-                    {
-                        data: 'libelle_classe'
-                    },
-                    {
-                        data: null,
-                        orderable: false,
-                        searchable: false,
-                        render: function(data) {
-                            return '<button class="btn-modifier" ' +
-                                'data-id="' + data.id_apprenti + '" ' +
-                                'data-nom="' + data.nom + '" ' +
-                                'data-prenom="' + data.prenom + '" ' +
-                                'data-id_classe="' + data.id_classe + '" ' +
-                                'style="background:#007bff;color:#fff;border:none;padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;margin-right:0.4rem;">✏️ Modifier</button>' +
-                                '<button class="btn-supprimer" ' +
-                                'data-id="' + data.id_apprenti + '" ' +
-                                'data-nom="' + data.nom + '" ' +
-                                'data-prenom="' + data.prenom + '" ' +
-                                'style="background:#dc3545;color:#fff;border:none;padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;">🗑️ Supprimer</button>';
-                        }
+                {
+                    data      : null,
+                    orderable : false,
+                    searchable: false,
+                    render    : function (data) {
+                        return '<button class="btn-app btn-app-info btn-sm-app btn-modifier me-1" '
+                            + 'data-id="'        + data.id_apprenti + '" '
+                            + 'data-nom="'       + data.nom         + '" '
+                            + 'data-prenom="'    + data.prenom      + '" '
+                            + 'data-id_classe="' + data.id_classe   + '">✏️ Modifier</button>'
+                            + '<button class="btn-app btn-app-danger btn-sm-app btn-supprimer" '
+                            + 'data-id="'     + data.id_apprenti + '" '
+                            + 'data-nom="'    + data.nom         + '" '
+                            + 'data-prenom="' + data.prenom      + '">🗑️ Supprimer</button>';
                     }
-                ],
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+                }
+            ],
+            language  : { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json' },
+            pageLength: 10
+        });
+
+        // ── Toggle formulaires ───────────────────────────────────
+        $('#btnAjouter').on('click', function () {
+            $('#formAjouter').toggle();
+            $('#formImport').hide();
+        });
+        $('#btnImport').on('click', function () {
+            $('#formImport').toggle();
+            $('#formAjouter').hide();
+        });
+        $('#annulerAjouter').on('click', function () { $('#formAjouter').hide(); });
+        $('#annulerImport').on('click',  function () { $('#formImport').hide();  });
+
+        // ── Modale Modifier — ouverture ──────────────────────────
+        $('#apprentisTable tbody').on('click', '.btn-modifier', function () {
+            console.group('🖊️ Ouverture modale Modifier');
+            console.log({ id: $(this).data('id'), nom: $(this).data('nom'), prenom: $(this).data('prenom'), id_classe: $(this).data('id_classe') });
+            console.groupEnd();
+            $('#modifierId').val($(this).data('id'));
+            $('#modifierNom').val($(this).data('nom'));
+            $('#modifierPrenom').val($(this).data('prenom'));
+            $('#modifierClasse').val($(this).data('id_classe'));
+            $('#modalModifier').addClass('active');
+        });
+
+        $('#closeModifier, #annulerModifier').on('click', function () {
+            $('#modalModifier').removeClass('active');
+        });
+        $('#modalModifier').on('click', function (e) {
+            if (e.target === this) $(this).removeClass('active');
+        });
+
+        // ── AJAX Modification ────────────────────────────────────
+        $('#formModifierModal').on('submit', function (e) {
+            e.preventDefault();
+            var formData   = $(this).serialize();
+            var formObject = Object.fromEntries(new URLSearchParams(formData));
+            console.group('📤 POST /apprentis/update');
+            console.log('Données envoyées :', formObject);
+            console.groupEnd();
+            $.ajax({
+                url    : '/apprentis/update',
+                method : 'POST',
+                data   : formData,
+                success: function (res) {
+                    console.group('📥 Réponse /apprentis/update');
+                    console.log('Succès :', res.success);
+                    console.log('Données:', res);
+                    console.groupEnd();
+                    if (res.success) {
+                        $('#modalModifier').removeClass('active');
+                        table.ajax.reload(null, false);
+                    }
                 },
-                pageLength: 10
-            });
-
-            // ── Modale Modifier ──
-            $('#apprentisTable tbody').on('click', '.btn-modifier', function() {
-                $('#modifierId').val($(this).data('id'));
-                $('#modifierNom').val($(this).data('nom'));
-                $('#modifierPrenom').val($(this).data('prenom'));
-                $('#modifierClasse').val($(this).data('id_classe'));
-                $('#modalModifier').css('display', 'block');
-            });
-
-            $('#closeModifier, #annulerModifier').on('click', function() {
-                $('#modalModifier').hide();
-            });
-            $('#modalModifier').on('click', function(e) {
-                if (e.target === this) $(this).hide();
-            });
-
-            // Soumission AJAX modification
-            $('#formModifierModal').on('submit', function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: '/apprentis/update',
-                    method: 'POST',
-                    data: $(this).serialize(),
-                    success: function(res) {
-                        if (res.success) {
-                            $('#modalModifier').hide();
-                            table.ajax.reload(null, false);
-                        }
-                    },
-                    error: function() {
-                        alert('Erreur lors de la modification.');
-                    }
-                });
-            });
-
-            // ── Modale Suppression ──
-            $('#apprentisTable tbody').on('click', '.btn-supprimer', function() {
-                $('#supprimerId').val($(this).data('id'));
-                $('#supprimerNomComplet').text($(this).data('nom') + ' ' + $(this).data('prenom'));
-                $('#modalSupprimer').css('display', 'block');
-            });
-
-            $('#annulerSupprimer').on('click', function() {
-                $('#modalSupprimer').hide();
-            });
-            $('#modalSupprimer').on('click', function(e) {
-                if (e.target === this) $(this).hide();
-            });
-
-            // Confirmation suppression AJAX
-            $('#btnConfirmerSupprimer').on('click', function() {
-                var id = $('#supprimerId').val();
-                $.ajax({
-                    url: '/apprentis/supprimer',
-                    method: 'POST',
-                    data: {
-                        _token: csrfToken,
-                        apprenti_id: id
-                    },
-                    success: function(res) {
-                        if (res.success) {
-                            $('#modalSupprimer').hide();
-                            table.ajax.reload(null, false);
-                        }
-                    },
-                    error: function() {
-                        alert('Erreur lors de la suppression.');
-                    }
-                });
-            });
-
-            // ── Toggle formulaires ──
-            $('#btnAjouter').on('click', function() {
-                $('#formAjouter').toggle();
-                $('#formImport').hide();
-            });
-            $('#btnImport').on('click', function() {
-                $('#formImport').toggle();
-                $('#formAjouter').hide();
+                error: function (xhr) {
+                    console.group('❌ ERREUR /apprentis/update');
+                    console.error('Status :', xhr.status);
+                    console.error('Réponse:', xhr.responseJSON);
+                    console.groupEnd();
+                    alert('Erreur lors de la modification.');
+                }
             });
         });
-    </script>
-@endsection
+
+        // ── Modale Suppression — ouverture ───────────────────────
+        $('#apprentisTable tbody').on('click', '.btn-supprimer', function () {
+            console.group('🗑️ Ouverture modale Supprimer');
+            console.log({ id: $(this).data('id'), nom: $(this).data('nom'), prenom: $(this).data('prenom') });
+            console.groupEnd();
+            $('#supprimerId').val($(this).data('id'));
+            $('#supprimerNomComplet').text($(this).data('nom') + ' ' + $(this).data('prenom'));
+            $('#modalSupprimer').addClass('active');
+        });
+
+        $('#closeSupprimer, #annulerSupprimer').on('click', function () {
+            $('#modalSupprimer').removeClass('active');
+        });
+        $('#modalSupprimer').on('click', function (e) {
+            if (e.target === this) $(this).removeClass('active');
+        });
+
+        // ── AJAX Suppression ─────────────────────────────────────
+        $('#btnConfirmerSupprimer').on('click', function () {
+            var id      = $('#supprimerId').val();
+            var payload = { _token: csrfToken, apprenti_id: id };
+            console.group('📤 POST /apprentis/supprimer');
+            console.log('Données envoyées :', payload);
+            console.groupEnd();
+            $.ajax({
+                url    : '/apprentis/supprimer',
+                method : 'POST',
+                data   : payload,
+                success: function (res) {
+                    console.group('📥 Réponse /apprentis/supprimer');
+                    console.log('Succès :', res.success);
+                    console.log('Données:', res);
+                    console.groupEnd();
+                    if (res.success) {
+                        $('#modalSupprimer').removeClass('active');
+                        table.ajax.reload(null, false);
+                    }
+                },
+                error: function (xhr) {
+                    console.group('❌ ERREUR /apprentis/supprimer');
+                    console.error('Status :', xhr.status);
+                    console.error('Réponse:', xhr.responseJSON);
+                    console.groupEnd();
+                    alert('Erreur lors de la suppression.');
+                }
+            });
+        });
+
+    });
+</script>
+@endpush
