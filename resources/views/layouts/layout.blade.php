@@ -545,7 +545,7 @@
 
     <!-- Sidebar -->
     <aside class="sidebar">
-        <a class="logo" href="/"><span>LARAVEL DRONE</span></a>
+        <a class="logo" href="/"><span>GESTION BIMD</span></a>
         <nav class="d-flex flex-column gap-1">
             <a href="{{ route('historique.index') }}"
                class="nav-link {{ request()->routeIs('historique.*') ? 'active' : '' }}">

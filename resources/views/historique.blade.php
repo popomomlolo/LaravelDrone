@@ -32,7 +32,7 @@
                         </td>
                         <td>
                             @if ($total === 0)
-                                <span class="result-none">Aucun objectif</span>
+                                <span class="result-none">Vol libre</span>
                             @elseif ($reussi === $total)
                                 <span class="result-success">✓ Réussi ({{ $reussi }}/{{ $total }})</span>
                             @else
