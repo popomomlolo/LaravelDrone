@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Valider extends Model
+class Validations extends Model
 {
     protected $table = 'validations';
     protected $primaryKey = ['id_session', 'id_objectif'];
@@ -21,7 +21,7 @@ class Valider extends Model
 
     public function session()
     {
-        return $this->belongsTo(Sessions::class, 'id_session', 'id_session');
+        return $this->belongsTo(SessionsDrone::class, 'id_session', 'id_session');
     }
 
     public function objectif()

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Meteo extends Model
+class ConditionsMeteo extends Model
 {
     protected $table = 'conditions_meteo';
     protected $primaryKey = 'id_meteo';
@@ -26,6 +26,6 @@ class Meteo extends Model
 
     public function sessions()
     {
-        return $this->hasMany(Sessions::class, 'id_meteo', 'id_meteo');
+        return $this->hasMany(SessionsDrone::class, 'id_meteo', 'id_meteo');
     }
 }

@@ -20,6 +20,6 @@ class Apprentis extends Model
 
     public function sessions()
     {
-        return $this->hasMany(Sessions::class, 'id_apprenti', 'id_apprenti');
+        return $this->hasMany(SessionsDrone::class, 'id_apprenti', 'id_apprenti');
     }
 }

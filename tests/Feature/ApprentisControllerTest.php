@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use App\Models\Apprenti;
+use App\Models\Apprentis as Apprenti;
 use App\Models\Classes;
 use App\Models\Formateurs;
 use Illuminate\Foundation\Testing\RefreshDatabase;

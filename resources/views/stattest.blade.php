@@ -50,6 +50,18 @@
             Non tenté <span style="color:#475569">●</span>
         </p>
     </div>
+
+    {{-- ════ DEBUG JSON ════ --}}
+    <div class="card-dark mb-4" id="debugZone">
+        <div class="debug-header">
+            <span class="debug-title">🛠 JSON reçus</span>
+            <button id="btnClearDebug" class="btn-app btn-app-secondary btn-sm-app">🗑 Vider</button>
+        </div>
+        <div id="debugLog">
+            <p class="msg-info">Aucune requête effectuée pour l'instant.</p>
+        </div>
+    </div>
+
     {{-- ════ MODALE DÉTAIL APPRENTI ════ --}}
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal-box">
@@ -116,6 +128,49 @@
         return { id_classe: $('#selectClasse').val(), id_objectif: $('#selectObjectif').val() };
     }
 
+
+    // ════════════════════════════════════════════════════════════════
+    // DEBUG — Encadré JSON
+    // ════════════════════════════════════════════════════════════════
+    let debugCount = 0;
+
+    function logDebug(methode, url, params, reponse) {
+        debugCount++;
+        const now    = new Date().toLocaleTimeString('fr-FR');
+        const id     = 'debug-' + debugCount;
+        const urlCourte = url.replace(window.location.origin, '');
+
+        const $entry = $('<div class="debug-entry" id="' + id + '">');
+
+        // En-tête cliquable
+        $('<div class="debug-entry-header">')
+            .append($('<span class="debug-entry-method">').text(methode))
+            .append($('<span class="debug-entry-url">').text(urlCourte))
+            .on('click', function () { $entry.toggleClass('open'); })
+            .appendTo($entry);
+
+        // Corps
+        const $body = $('<div class="debug-entry-body">').appendTo($entry);
+
+        if (params && Object.keys(params).length > 0) {
+            $body.append($('<div class="debug-entry-label">').text('Paramètres envoyés'));
+            $body.append($('<pre class="debug-pre">').text(JSON.stringify(params, null, 2)));
+        }
+
+        $body.append($('<div class="debug-entry-label">').text('Réponse reçue'));
+        $body.append($('<pre class="debug-pre">').text(JSON.stringify(reponse, null, 2)));
+
+        // Remplace le message "aucune requête" si présent
+        $('#debugLog p.msg-info').remove();
+        $('#debugLog').prepend($entry);
+    }
+
+    // Bouton vider
+    $('#btnClearDebug').on('click', function () {
+        $('#debugLog').html('<p class="msg-info">Aucune requête effectuée pour l\'instant.</p>');
+        debugCount = 0;
+    });
+
     // ════════════════════════════════════════════════════════════════
     // EXPORTS
     // ════════════════════════════════════════════════════════════════
@@ -158,6 +213,8 @@
                 console.log('Nombre d\'apprentis :', data.length);
                 console.log('JSON complet       :', data);
                 console.groupEnd();
+
+                logDebug('GET', urlFiltrer, filtres, data);
                 tousLesApprentis = data;
                 afficherTableau(data);
 
@@ -192,6 +249,8 @@
                 console.group('📥 Réponse chartData()');
                 console.log('Total :', data.total, '| Objectifs :', data.objectifs);
                 console.groupEnd();
+
+                logDebug('GET', urlChartData, filtres, data);
                 if (data.objectifs && data.objectifs.length > 0) {
                     $('#chartZone').show();
                     setTimeout(() => initChart(data), 100);
@@ -228,6 +287,8 @@
                 console.log('Sessions :', data.sessions.length);
                 console.log('JSON     :', data);
                 console.groupEnd();
+
+                logDebug('GET', url, { id: apprentiId }, data);
                 $('#modalSpinner').hide();
                 afficherSessions(data);
             },

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Sessions extends Model
+class SessionsDrone extends Model
 {
     protected $table      = 'sessions_drone';
     protected $primaryKey = 'id_session';
@@ -29,7 +29,7 @@ class Sessions extends Model
 
     public function meteo()
     {
-        return $this->belongsTo(Meteo::class, 'id_meteo', 'id_meteo');
+        return $this->belongsTo(ConditionsMeteo::class, 'id_meteo', 'id_meteo');
     }
 
     public function formateur()

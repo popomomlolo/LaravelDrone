@@ -34,13 +34,23 @@ Route::middleware('auth')->group(function () {
 
     // ── Déconnexion ──
     Route::post('/signout', [AuthController::class, 'signout'])->name('signout');
-});
- Route::get('/statistique',         [statistiqueControlleur::class, 'index'])->name('statistique.index');
+
+        Route::get('/statistique',         [statistiqueControlleur::class, 'index'])->name('statistique.index');
     Route::get('/statistique/filtrer', [statistiqueControlleur::class, 'filtrer'])->name('statistique.filtrer');
     Route::get('/statistique/csv',     [statistiqueControlleur::class, 'exportCsv'])->name('statistique.csv');
     Route::get('/statistique/pdf',     [statistiqueControlleur::class, 'exportPdf'])->name('statistique.pdf');
+    Route::get('/statistique/detail/{id}', [statistiqueControlleur::class, 'detail'])->name('statistique.detail');
+    Route::get('/statistique/chart-data',  [statistiqueControlleur::class, 'chartData'])->name('statistique.chartData');
 
-    /*
+//Pour les tests
+    Route::get('/testStat',         [statistiqueControlleur::class, 'index'])->name('testStat.index');
+    Route::get('/testStat/filtrer', [statistiqueControlleur::class, 'filtrer'])->name('testStat.filtrer');
+    Route::get('/testStat/csv',     [statistiqueControlleur::class, 'exportCsv'])->name('testStat.csv');
+    Route::get('/testStat/pdf',     [statistiqueControlleur::class, 'exportPdf'])->name('testStat.pdf');
+});
+
+
+/*
     Route::get('/testStat',         [statistiqueControlleur::class, 'index'])->name('testStat.index');
     Route::get('/testStat/filtrer', [statistiqueControlleur::class, 'filtrer'])->name('testStat.filtrer');
     Route::get('/testStat/csv',     [statistiqueControlleur::class, 'exportCsv'])->name('testStat.csv');

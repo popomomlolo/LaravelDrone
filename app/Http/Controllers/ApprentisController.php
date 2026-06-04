@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Apprenti;
+use App\Models\Apprentis as Apprenti;
 use App\Models\Classes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
