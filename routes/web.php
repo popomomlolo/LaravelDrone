@@ -42,11 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/statistique/detail/{id}', [statistiqueControlleur::class, 'detail'])->name('statistique.detail');
     Route::get('/statistique/chart-data',  [statistiqueControlleur::class, 'chartData'])->name('statistique.chartData');
 
-//Pour les tests
-    Route::get('/testStat',         [statistiqueControlleur::class, 'index'])->name('testStat.index');
-    Route::get('/testStat/filtrer', [statistiqueControlleur::class, 'filtrer'])->name('testStat.filtrer');
-    Route::get('/testStat/csv',     [statistiqueControlleur::class, 'exportCsv'])->name('testStat.csv');
-    Route::get('/testStat/pdf',     [statistiqueControlleur::class, 'exportPdf'])->name('testStat.pdf');
+
 });
 
 
