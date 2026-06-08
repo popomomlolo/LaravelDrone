@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
  *
  * @package App\Http\Controllers
  */
-class statistiqueControlleur extends Controller
+class StatistiqueController extends Controller
 {
     /**
      * @brief Affiche la page principale des statistiques.

@@ -2,9 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApprentisController;
-use App\Http\Controllers\historiqueControlleur;
-use App\Http\Controllers\statistiqueControlleur;
+use App\Http\Controllers\HistoriqueController;
+use App\Http\Controllers\StatistiqueController;
 use App\Http\Controllers\AuthController;
+
 
 // ── Auth (public) ──
 Route::get('/signin', [AuthController::class, 'signinForm'])->name('login');
@@ -18,7 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', fn() => redirect()->route('historique.index'));
 
     // ── Historique ──
-    Route::get('/historique', [historiqueControlleur::class, 'index'])->name('historique.index');
+    Route::get('/historique', [HistoriqueController::class, 'index'])->name('historique.index');
 
     // ── Statistiques ──
    
@@ -35,12 +36,12 @@ Route::middleware('auth')->group(function () {
     // ── Déconnexion ──
     Route::post('/signout', [AuthController::class, 'signout'])->name('signout');
 
-        Route::get('/statistique',         [statistiqueControlleur::class, 'index'])->name('statistique.index');
-    Route::get('/statistique/filtrer', [statistiqueControlleur::class, 'filtrer'])->name('statistique.filtrer');
-    Route::get('/statistique/csv',     [statistiqueControlleur::class, 'exportCsv'])->name('statistique.csv');
-    Route::get('/statistique/pdf',     [statistiqueControlleur::class, 'exportPdf'])->name('statistique.pdf');
-    Route::get('/statistique/detail/{id}', [statistiqueControlleur::class, 'detail'])->name('statistique.detail');
-    Route::get('/statistique/chart-data',  [statistiqueControlleur::class, 'chartData'])->name('statistique.chartData');
+    Route::get('/statistique',         [StatistiqueController::class, 'index'])->name('statistique.index');
+    Route::get('/statistique/filtrer', [StatistiqueController::class, 'filtrer'])->name('statistique.filtrer');
+    Route::get('/statistique/csv',     [StatistiqueController::class, 'exportCsv'])->name('statistique.csv');
+    Route::get('/statistique/pdf',     [StatistiqueController::class, 'exportPdf'])->name('statistique.pdf');
+    Route::get('/statistique/detail/{id}', [StatistiqueController::class, 'detail'])->name('statistique.detail');
+    Route::get('/statistique/chart-data',  [StatistiqueController::class, 'chartData'])->name('statistique.chartData');
 
 
 });

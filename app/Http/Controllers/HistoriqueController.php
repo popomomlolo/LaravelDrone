@@ -12,7 +12,7 @@ use App\Models\SessionsDrone as Sessions;
  *
  * @package App\Http\Controllers
  */
-class historiqueControlleur extends Controller
+class HistoriqueController extends Controller
 {
     /**
      * @brief Affiche la page d'historique de toutes les sessions.
