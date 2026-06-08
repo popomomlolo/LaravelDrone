@@ -11,6 +11,14 @@
         <div class="alert-app alert-app-success mb-3">{{ session('success') }}</div>
     @endif
 
+    @if ($errors->any())
+        <div class="alert-app alert-app-danger mb-3">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
+
     <div class="d-flex gap-2 mb-3">
         <button
             id="btnAjouter"
@@ -22,6 +30,16 @@
             type="button"
             class="btn-app btn-app-info"
         >⬆ Importer CSV</button>
+        <button
+            id="btnAjouterClasse"
+            type="button"
+            class="btn-app btn-app-secondary"
+        >🏫 Ajouter une classe</button>
+        <button
+            id="btnSupprimerClasse"
+            type="button"
+            class="btn-app btn-app-danger"
+        >🗑️ Supprimer une classe</button>
     </div>
 
     <div
@@ -112,6 +130,83 @@
                     type="button"
                     id="annulerImport"
                     class="btn-app btn-app-danger"
+                >✕ Annuler</button>
+            </div>
+        </form>
+    </div>
+
+    {{-- Formulaire Ajouter une classe --}}
+    <div
+        id="formAjouterClasse"
+        class="card-dark form-panel mb-3"
+        style="display:none;"
+    >
+        <div class="form-panel-title">Ajouter une classe</div>
+        <p class="form-panel-hint">Le nom sera automatiquement formaté en MAJUSCULES sans espaces superflus.</p>
+        <form
+            action="/classes/ajouter"
+            method="POST"
+        >
+            @csrf
+            <div class="mb-3">
+                <label class="form-label-dark">Nom de la classe</label>
+                <input
+                    type="text"
+                    name="libelle_classe"
+                    id="inputNomClasse"
+                    placeholder="Ex: BTS SN 1"
+                    required
+                    class="form-control-dark"
+                >
+            </div>
+            <div class="d-flex gap-2">
+                <button
+                    type="submit"
+                    class="btn-app btn-app-success"
+                >✓ Créer</button>
+                <button
+                    type="button"
+                    id="annulerAjouterClasse"
+                    class="btn-app btn-app-danger"
+                >✕ Annuler</button>
+            </div>
+        </form>
+    </div>
+
+    {{-- Formulaire Supprimer une classe --}}
+    <div
+        id="formSupprimerClasse"
+        class="card-dark form-panel mb-3"
+        style="display:none;"
+    >
+        <div class="form-panel-title">Supprimer une classe</div>
+        <p class="form-panel-hint">⚠️ Tous les apprentis de cette classe et leurs sessions seront supprimés définitivement.</p>
+        <form
+            action="/classes/supprimer"
+            method="POST"
+        >
+            @csrf
+            <div class="mb-3">
+                <label class="form-label-dark">Classe à supprimer</label>
+                <select
+                    name="id_classe"
+                    required
+                    class="form-select-dark"
+                >
+                    @foreach ($classes as $id => $libelle)
+                        <option value="{{ $id }}">{{ $libelle }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="d-flex gap-2">
+                <button
+                    type="submit"
+                    class="btn-app btn-app-danger"
+                >🗑️ Supprimer</button>
+                <button
+                    type="button"
+                    id="annulerSupprimerClasse"
+                    class="btn-app btn-app-secondary"
                 >✕ Annuler</button>
             </div>
         </form>
@@ -334,6 +429,7 @@
             // Boutons Ajouter / Importer
             $('#btnAjouter').on('click', function() {
                 $('#formImport').hide();
+                $('#formAjouterClasse').hide();
                 $('#formAjouter').toggle();
             });
             $('#annulerAjouter').on('click', function() {
@@ -341,17 +437,59 @@
             });
             $('#btnImport').on('click', function() {
                 $('#formAjouter').hide();
+                $('#formAjouterClasse').hide();
                 $('#formImport').toggle();
             });
             $('#annulerImport').on('click', function() {
                 $('#formImport').hide();
             });
+            $('#btnAjouterClasse').on('click', function() {
+                $('#formAjouter').hide();
+                $('#formImport').hide();
+                $('#formSupprimerClasse').hide();
+                $('#formAjouterClasse').toggle();
+            });
+            $('#annulerAjouterClasse').on('click', function() {
+                $('#formAjouterClasse').hide();
+            });
+            $('#btnSupprimerClasse').on('click', function() {
+                $('#formAjouter').hide();
+                $('#formImport').hide();
+                $('#formAjouterClasse').hide();
+                $('#formSupprimerClasse').toggle();
+            });
+            $('#annulerSupprimerClasse').on('click', function() {
+                $('#formSupprimerClasse').hide();
+            });
+
+            // Normalisation MAJUSCULES sans espaces superflus sur le champ nom de classe
+            function normalizeClasse(val) {
+                return val.toUpperCase().replace(/\s+/g, ' ').trim();
+            }
+            $('#inputNomClasse').on('input', function() {
+                var pos = this.selectionStart;
+                // Supprimer les caractères spéciaux : garder uniquement lettres, chiffres, espaces et tirets
+                var cleaned = $(this).val().replace(/[^a-zA-ZÀ-ÿ0-9 \-]/g, '').toUpperCase();
+                $(this).val(cleaned);
+                this.setSelectionRange(pos, pos);
+            });
+            $('form[action="/classes/ajouter"]').on('submit', function(e) {
+                var val = normalizeClasse($('#inputNomClasse').val());
+                if (/[^a-zA-ZÀ-ÿ0-9 \-]/.test(val)) {
+                    e.preventDefault();
+                    alert('Le nom de la classe ne doit pas contenir de caractères spéciaux.');
+                    return;
+                }
+                $('#inputNomClasse').val(val);
+            });
 
             var table = $('#apprentisTable').DataTable({
                 ajax: {
-                    url     : '/api/apprentis',
-                    dataSrc : '',
-                    error   : function(xhr) { console.error('Erreur chargement apprentis', xhr.responseText); }
+                    url: '/api/apprentis',
+                    dataSrc: '',
+                    error: function(xhr) {
+                        console.error('Erreur chargement apprentis', xhr.responseText);
+                    }
                 },
                 columns: [{
                         data: 'id_apprenti',
@@ -450,8 +588,12 @@
                 if (allSelected) {
                     var $btn = $(this).prop('disabled', true).text('⏳ Chargement...');
                     // Récupérer TOUS les IDs (toutes pages) via l'API avec le filtre actif
-                    $.getJSON('/api/apprentis', { id_classe: $('#selectClasse').val() }, function(data) {
-                        data.forEach(function(a) { selectedIds.add(a.id_apprenti); });
+                    $.getJSON('/api/apprentis', {
+                        id_classe: $('#selectClasse').val()
+                    }, function(data) {
+                        data.forEach(function(a) {
+                            selectedIds.add(a.id_apprenti);
+                        });
                         // Cocher les cases visibles sur la page courante
                         $('#apprentisTable tbody .cb-apprenti').each(function() {
                             if (selectedIds.has(parseInt($(this).data('id')))) {

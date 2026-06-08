@@ -192,6 +192,55 @@ class ApprentisController extends Controller
     }
 
     /**
+     * @brief Crée une nouvelle classe avec normalisation du nom (MAJUSCULES, sans espaces superflus).
+     *
+     * @route POST /classes/ajouter
+     *
+     * @param Request $request Requête contenant `libelle_classe` (string)
+     *
+     * @return \Illuminate\Http\RedirectResponse Redirection vers /apprentis
+     */
+    public function storeClasse(Request $request)
+    {
+        $request->validate([
+            'libelle_classe' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZÀ-ÿ0-9 \-]+$/'],
+        ], [
+            'libelle_classe.regex' => 'Le nom de la classe ne doit pas contenir de caractères spéciaux.',
+        ]);
+        $libelle = strtoupper(preg_replace('/\s+/', ' ', trim($request->libelle_classe)));
+        Classes::firstOrCreate(['libelle_classe' => $libelle]);
+        return redirect('/apprentis')->with('success', 'Classe "' . $libelle . '" ajoutée avec succès');
+    }
+
+    /**
+     * @brief Supprime une classe.
+     *
+     * Les apprentis associés voient leur id_classe mis à NULL.
+     *
+     * @route POST /classes/supprimer
+     *
+     * @param Request $request Requête contenant `id_classe` (int)
+     *
+     * @return \Illuminate\Http\RedirectResponse Redirection vers /apprentis
+     */
+    public function destroyClasse(Request $request)
+    {
+        $classe = Classes::find($request->id_classe);
+        if (!$classe) {
+            return redirect('/apprentis')->with('error', 'Classe introuvable');
+        }
+        // Supprimer les sessions puis les apprentis de cette classe avant suppression
+        $apprentiIds = Apprenti::where('id_classe', $request->id_classe)->pluck('id_apprenti')->toArray();
+        if (!empty($apprentiIds)) {
+            DB::table('sessions_drone')->whereIn('id_apprenti', $apprentiIds)->delete();
+            Apprenti::whereIn('id_apprenti', $apprentiIds)->delete();
+        }
+        $libelle = $classe->libelle_classe;
+        $classe->delete();
+        return redirect('/apprentis')->with('success', 'Classe "' . $libelle . '" supprimée avec succès');
+    }
+
+    /**
      * @brief Crée un nouvel apprenti et redirige vers la liste.
      *
      * @route POST /apprentis/ajouter
@@ -238,9 +287,12 @@ class ApprentisController extends Controller
         $firstLine = true;
         $count     = 0;
         while (($row = fgetcsv($file, 1000, ',')) !== false) {
-            if ($firstLine) { $firstLine = false; continue; }
+            if ($firstLine) {
+                $firstLine = false;
+                continue;
+            }
             if (count($row) >= 3) {
-                $libelleClasse = trim($row[2]);
+                $libelleClasse = strtoupper(preg_replace('/\s+/', ' ', trim($row[2])));
                 $classe = Classes::firstOrCreate(['libelle_classe' => $libelleClasse]);
                 Apprenti::create([
                     'nom'       => trim($row[0]),

@@ -30,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/apprentis/modifier',             [ApprentisController::class, 'editForm']);
     Route::post('/apprentis/update',               [ApprentisController::class, 'update']);
     Route::post('/apprentis/ajouter',              [ApprentisController::class, 'store']);
+    Route::post('/classes/ajouter',                [ApprentisController::class, 'storeClasse']);
+    Route::post('/classes/supprimer',              [ApprentisController::class, 'destroyClasse']);
     Route::post('/apprentis/import-csv',           [ApprentisController::class, 'importCsv']);
     Route::get('/api/apprentis',                   [ApprentisController::class, 'apiIndex']);
 
