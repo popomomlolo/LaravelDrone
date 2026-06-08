@@ -22,16 +22,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/historique', [HistoriqueController::class, 'index'])->name('historique.index');
 
     // ── Statistiques ──
-   
+
     // ── Apprentis ──
-    Route::get('/apprentis',                [ApprentisController::class, 'index'])->name('apprentis.index');
-    Route::post('/apprentis/supprimer',     [ApprentisController::class, 'destroy']);
-    //Route::get('/apprentis/showform',     [ApprentisController::class, 'showform']);
-    Route::post('/apprentis/modifier',      [ApprentisController::class, 'editForm']);
-    Route::post('/apprentis/update',        [ApprentisController::class, 'update']);
-    Route::post('/apprentis/ajouter',       [ApprentisController::class, 'store']);
-    Route::post('/apprentis/import-csv',    [ApprentisController::class, 'importCsv']);
-    Route::get('/api/apprentis',            [ApprentisController::class, 'apiIndex']);
+    Route::get('/apprentis',                       [ApprentisController::class, 'index'])->name('apprentis.index');
+    Route::post('/apprentis/supprimer',            [ApprentisController::class, 'destroy']);
+    Route::post('/apprentis/supprimer-selection',  [ApprentisController::class, 'destroySelection']);
+    Route::post('/apprentis/modifier',             [ApprentisController::class, 'editForm']);
+    Route::post('/apprentis/update',               [ApprentisController::class, 'update']);
+    Route::post('/apprentis/ajouter',              [ApprentisController::class, 'store']);
+    Route::post('/apprentis/import-csv',           [ApprentisController::class, 'importCsv']);
+    Route::get('/api/apprentis',                   [ApprentisController::class, 'apiIndex']);
 
     // ── Déconnexion ──
     Route::post('/signout', [AuthController::class, 'signout'])->name('signout');
@@ -42,8 +42,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/statistique/pdf',     [StatistiqueController::class, 'exportPdf'])->name('statistique.pdf');
     Route::get('/statistique/detail/{id}', [StatistiqueController::class, 'detail'])->name('statistique.detail');
     Route::get('/statistique/chart-data',  [StatistiqueController::class, 'chartData'])->name('statistique.chartData');
-
-
 });
 
 

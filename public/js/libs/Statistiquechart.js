@@ -19,26 +19,26 @@ function initChart(data) {                                          // ← signa
         return;
     }
 
-    const total       = data.total;                                 // ← lecture directe
-    const categories  = data.objectifs.map(o => o.libelle);        // ← lecture directe
-    const dataReussi  = data.objectifs.map(o => o.reussi);         // ← lecture directe
-    const dataEchoue  = data.objectifs.map(o => o.echoue);         // ← lecture directe
-    const dataNonTente= data.objectifs.map(o => o.non_tente);      // ← lecture directe (non_tente avec _)
+    const total = data.total;                                 // ← lecture directe
+    const categories = data.objectifs.map(objectifs => objectifs.libelle);        // ← nom de l'objectif (libelle) pour les catégories de l'axe X
+    const dataReussi = data.objectifs.map(objectifs => objectifs.reussi);         // ← nombre d'apprentis réussis pour chaque objectif
+    const dataEchoue = data.objectifs.map(objectifs => objectifs.echoue);         // ← nombre d'apprentis échoués pour chaque objectif
+    const dataNonTente = data.objectifs.map(objectifs => objectifs.non_tente);      // ← nombre d'apprentis non tentés pour chaque objectif
 
     console.log('Objectifs  :', categories);
     console.log('Réussis    :', dataReussi);
     console.log('Échoués    :', dataEchoue);
     console.log('Non tentés :', dataNonTente);
 
-    const titre    = 'Réussite par objectif';                       // ← filtre supprimé (géré côté serveur)
+    const titre = 'Réussite par objectif';                       // ← filtre supprimé (géré côté serveur)
     const sousTitre = 'Réussi / Échoué / Non tenté par objectif (' + total + ' apprentis)';
 
     Highcharts.chart('chartContainer', {
         chart: {
-            type               : 'column',
-            backgroundColor    : 'transparent',
+            type: 'column',
+            backgroundColor: 'transparent',
             plotBackgroundColor: 'transparent',
-            style              : { fontFamily: 'Raleway, sans-serif' }
+            style: { fontFamily: 'Raleway, sans-serif' }
         },
         navigation: {
             buttonOptions: {
@@ -46,52 +46,89 @@ function initChart(data) {                                          // ← signa
             }
         },
         title: {
-            text : titre,
+            text: titre,
             style: { fontWeight: '600', fontSize: '1rem' }
         },
         subtitle: {
-            text : sousTitre,
+            text: sousTitre,
             style: { fontSize: '13px' }
         },
         xAxis: {
             categories: categories,
-            labels    : { style: { fontSize: '13px', fontWeight: 'bold' } }
+            labels: { style: { fontSize: '13px', fontWeight: 'bold' } }
         },
         yAxis: {
-            min           : 0,
-            title         : { text: 'Pourcentage (%)' },
+            min: 0,
+            title: { text: 'Pourcentage (%)' },
             reversedStacks: false
         },
         tooltip: {
-            shared   : true,
+            shared: true,
             formatter: function () {
-                let s = '<b>' + this.x + '</b><br/>';
-                this.points.slice().reverse().forEach(function (point) {
-                    s += '<span style="color:' + point.color + '">●</span> '
-                        + point.series.name + ' : <b>' + point.y + '</b> ('
-                        + Highcharts.numberFormat(point.percentage, 0) + '%)'
-                        + ' / ' + total + ' apprentis<br/>';
+
+                // Conteneur principal du tooltip
+                var $tooltip = $('<div>');
+
+                // Titre (nom de l'objectif)
+                $tooltip.append(
+                    $('<b>').text(categories[this.x])
+                );
+
+                $tooltip.append('<br>');
+
+                
+                $.each(this.points.slice().reverse(), function (index, point) {
+
+                    var $ligne = $('<div>');
+
+                    $ligne.append(
+                        $('<span>')
+                            .css('color', point.color)
+                            .text('● ')
+                    );
+
+                    $ligne.append(
+                        point.series.name +
+                        ' : '
+                    );
+
+                    $ligne.append(
+                        $('<b>').text(point.y)
+                    );
+
+                    $tooltip.append('<br>');
+                    
+                    $ligne.append(
+                        ' (' +
+                        Highcharts.numberFormat(point.percentage, 0) +
+                        '%) / ' +
+                        total +
+                        ' apprentis'
+                    );
+
+                    $tooltip.append($ligne);
                 });
-                return s;
+
+                return $tooltip.html();
             }
         },
         plotOptions: {
             column: {
-                stacking   : 'percent',
+                stacking: 'percent',
                 borderWidth: 0,
-                dataLabels : {
+                dataLabels: {
                     enabled: true,
-                    format : '{point.percentage:.0f}%',
-                    style  : { fontSize: '11px', fontWeight: 'bold', textOutline: 'none' }
+                    format: '{point.percentage:.0f}%',
+                    style: { fontSize: '11px', fontWeight: 'bold', textOutline: 'none' }
                 }
             }
         },
         series: [
-            { name: 'Réussi',    data: dataReussi,   color: '#22c55e' },
-            { name: 'Échoué',    data: dataEchoue,   color: '#ef4444' },
+            { name: 'Réussi', data: dataReussi, color: '#22c55e' },
+            { name: 'Échoué', data: dataEchoue, color: '#ef4444' },
             { name: 'Non tenté', data: dataNonTente, color: '#9ca3af' }
         ],
-        legend : { enabled: true, align: 'center', verticalAlign: 'bottom' },
+        legend: { enabled: true, align: 'center', verticalAlign: 'bottom' },
         credits: { enabled: false }
     });
 }
