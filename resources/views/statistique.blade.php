@@ -102,15 +102,30 @@
 
     // ── Helpers labels ──────────────────────────────────────────────
     function labelDrone(v)         { return (v === true || v === 1) ? '🚁 Classique' : '🚁 Assisté'; }
-    function labelEnvironnement(v) { return (v === true || v === 1) ? '🌳 Extérieur' : '🏠 Intérieur'; }
-    function labelCiel(c)          { return ({0:'☀️ Dégagé',1:'⛅ Nuageux',2:'☁️ Couvert',3:'🌧️ Pluvieux'})[c] ?? '—'; }
+    function labelEnvironnement(v) { return (v === true || v === 1) ? '🏠 Intérieur' : '🌳 Extérieur'; }
+    function labelCiel(c)          { return ({0:'☀️ Dégagé',1:'🌧️ Pluvieux',2:'⛅ Nuageux',3:'☁️ Couvert'})[c] ?? '—'; }
     function labelJour(v)          { return (v === true || v === 1) ? '🌞 Jour' : '🌙 Nuit'; }
 
-    function celluleObjectif(etat, qr, qa) {
-        if (etat === 'reussi') return '<span class="obj-cell obj-reussi">✓ ' + qr + '/' + qa + '</span>';
-        if (etat === 'echoue') return '<span class="obj-cell obj-echoue">✗ ' + qr + '/' + qa + '</span>';
-        return '<span class="obj-cell obj-nontente">— n/a</span>';
+    function celluleObjectif(etat, qr, qa, libelleObjectif) {
+
+    const afficherQuantite =
+        libelleObjectif &&
+        libelleObjectif.toLowerCase().includes('cerceau');
+
+    if (etat === 'reussi') {
+        return afficherQuantite
+            ? '<span class="obj-cell obj-reussi">✓ ' + qr + '/' + qa + '</span>'
+            : '<span class="obj-cell obj-reussi">✓ Réussi</span>';
     }
+
+    if (etat === 'echoue') {
+        return afficherQuantite
+            ? '<span class="obj-cell obj-echoue">✗ ' + qr + '/' + qa + '</span>'
+            : '<span class="obj-cell obj-echoue">✗ Échoué</span>';
+    }
+
+    return '<span class="obj-cell obj-nontente">—</span>';
+}
 
     function filtresActifs() {
         return { id_classe: $('#selectClasse').val(), id_objectif: $('#selectObjectif').val() };
@@ -330,12 +345,22 @@
             $.each(tousNoms, function (j, nom) {
                 const o = objMap[nom];
                 $tr.append($('<td>').html(o
-                    ? celluleObjectif(o.reussi ? 'reussi' : 'echoue', o.qr, o.qa)
-                    : celluleObjectif('nontente', 0, 0)
-                ));
+    ? celluleObjectif(
+        o.reussi ? 'reussi' : 'echoue',
+        o.qr,
+        o.qa,
+        nom
+    )
+    : celluleObjectif(
+        'nontente',
+        0,
+        0,
+        nom
+    )
+));
             });
 
-            const ext = (session.type_environnement === true || session.type_environnement === 1);
+            const ext = (session.type_environnement === false || session.type_environnement === 1);
 
             $tr.append($('<td>').html('<span class="badge-app badge-app-info">' + labelDrone(session.type_drone) + '</span>'))
                .append($('<td>').html(ext

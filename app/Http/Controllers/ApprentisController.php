@@ -53,15 +53,41 @@ class ApprentisController extends Controller
      */
     public function apiIndex()
     {
-        $apprentis = Apprenti::with('classe')->orderBy('nom')->get()
-            ->map(fn($a) => [
-                'id_apprenti'    => $a->id_apprenti,
-                'nom'            => $a->nom,
-                'prenom'         => $a->prenom,
-                'id_classe'      => $a->id_classe,
-                'libelle_classe' => $a->classe->libelle_classe ?? $a->id_classe,
-            ]);
+        $idClasse = request('id_classe') ?: null;
+
+        $query = Apprenti::with('classe')->orderBy('nom');
+        if ($idClasse) {
+            $query->where('id_classe', $idClasse);
+        }
+
+        $apprentis = $query->get()->map(fn($a) => [
+            'id_apprenti'    => $a->id_apprenti,
+            'nom'            => $a->nom,
+            'prenom'         => $a->prenom,
+            'id_classe'      => $a->id_classe,
+            'libelle_classe' => $a->classe->libelle_classe ?? $a->id_classe,
+        ]);
         return response()->json($apprentis);
+    }
+
+    /**
+     * @brief Supprime plusieurs apprentis et leurs sessions en une seule requête.
+     *
+     * @route POST /apprentis/supprimer-selection
+     *
+     * @param Request $request Requête contenant `ids` (array d'int)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroySelection(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids) || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'Aucun apprenti sélectionné'], 422);
+        }
+        DB::table('sessions_drone')->whereIn('id_apprenti', $ids)->delete();
+        $deleted = Apprenti::whereIn('id_apprenti', $ids)->delete();
+        return response()->json(['success' => true, 'deleted' => $deleted]);
     }
 
     /**

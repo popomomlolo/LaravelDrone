@@ -331,16 +331,27 @@
 
         $(document).ready(function() {
 
+            // Boutons Ajouter / Importer
+            $('#btnAjouter').on('click', function() {
+                $('#formImport').hide();
+                $('#formAjouter').toggle();
+            });
+            $('#annulerAjouter').on('click', function() {
+                $('#formAjouter').hide();
+            });
+            $('#btnImport').on('click', function() {
+                $('#formAjouter').hide();
+                $('#formImport').toggle();
+            });
+            $('#annulerImport').on('click', function() {
+                $('#formImport').hide();
+            });
+
             var table = $('#apprentisTable').DataTable({
                 ajax: {
-                    url: function () {
-                        var idClasse = $('#selectClasse').val();
-                        return '/api/apprentis' + (idClasse ? '?id_classe=' + encodeURIComponent(idClasse) : '');
-                    },
-                    dataSrc: '',
-                    error: function(xhr) {
-                        console.error('Erreur chargement apprentis', xhr.responseText);
-                    }
+                    url     : '/api/apprentis',
+                    dataSrc : '',
+                    error   : function(xhr) { console.error('Erreur chargement apprentis', xhr.responseText); }
                 },
                 columns: [{
                         data: 'id_apprenti',
@@ -406,10 +417,12 @@
                 selectedIds.clear();
                 allSelected = false;
                 $('#btnSelectAll').text('☑ Tout sélectionner');
-                table.ajax.reload(function() {
+                var idClasse = $(this).val();
+                var url = '/api/apprentis' + (idClasse ? '?id_classe=' + encodeURIComponent(idClasse) : '');
+                table.ajax.url(url).load(function() {
                     $('#spinner').hide();
                     updateSelectionBar();
-                }, false);
+                });
             });
 
             // Coche / décoche individuelle
